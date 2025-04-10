@@ -1,6 +1,6 @@
 # NMAP
 
-### Nmap address scanning
+### Nmap address 스캐닝
 #### Scan 단일 IP
 ```nmap 192.168.1.1```
 
