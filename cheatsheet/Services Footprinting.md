@@ -4,8 +4,8 @@
 ```nmap -sV -p21 -sC -A 192.168.1.1```
 
 ### 서비스 연결 확인
-```nc -nv 192.168.1.1 21```<br/>
-```telnet 192.168.1.1 21```
+- ```nc -nv 192.168.1.1 21```<br/>
+- ```telnet 192.168.1.1 21```
 
 ### FTP server에서 사용 가능한 모든 파일 다운로드
 ```wget -m --no-passive ftp://anonymous:anonymous@<IP>```
@@ -28,8 +28,8 @@
 ```dig axfr <domain> @<nameserver>```
 
 ### 서브 도메인 Brute Forcing
-```$ for sub in $(cat /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.domain.com @<nameserver> | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done```<br/>
-```$ dnsenum --dnsserver <nameserver> --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt domain.com```
+- ```$ for sub in $(cat /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.domain.com @<nameserver> | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done```<br/>
+- ```$ dnsenum --dnsserver <nameserver> --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt domain.com```
 <br/><br/>
 # SMB(139, 445)
 
@@ -57,22 +57,22 @@
 ```$ for i in $(seq 500 1100);do rpcclient -N -U "" <IP> -c "queryuser 0x$(printf '%x\n' $i)" | grep "User Name\|user_rid\|group_rid" && echo "";done```
 
 ### Null session을 이용한 SMB shares 열거(Tool)
-```smbmap -H <IP>```<br/>
-```crackmapexec smb <IP> --shares -u '' -p ''```<br/>
-```enum4linux-ng.py <IP> -A```
+- ```smbmap -H <IP>```<br/>
+- ```crackmapexec smb <IP> --shares -u '' -p ''```<br/>
+- ```enum4linux-ng.py <IP> -A```
 <br/><br/>
 # NFS(111, 2049)
 
 ### NFS 포트에 대한 서비스 스캔
-```nmap 192.168.1.1 -p111,2049 -sV -sC```<br/>
-```nmap --script nfs* 192.168.1.1 -sV -p111,2049```
+- ```nmap 192.168.1.1 -p111,2049 -sV -sC```<br/>
+- ```nmap --script nfs* 192.168.1.1 -sV -p111,2049```
 
 ### NFS shares 보기
 ```showmount -e <IP>```
 
 ### NFS share를 ./target-NFS에 마운트/언마운트
-```mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
-```umount ./target-NFS```
+- ```mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
+- ```umount ./target-NFS```
 <br/><br/>
 # SSH(22)
 
@@ -220,8 +220,8 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 # Rsync(873)
 
 ### Rsync 포트에 대한 서비스 스캔
-```nmap -sV -p 873 192.168.1.1```<br/>
-```nc -nv 192.168.1.1 873```
+- ```nmap -sV -p 873 192.168.1.1```<br/>
+- ```nc -nv 192.168.1.1 873```
 
 ### 공유 디렉토리 접근
 ```rsync -av --list-only rsync://192.168.1.1/<share>```
@@ -240,5 +240,5 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 ```./rdp-sec-check.pl 192.168.1.1```
 
 ### RDP 연결
-```xfreerdp /u:<user> /p:"<password>" /v:<FQDN/IP>```<br/>
-```rdesktop -u <user> -p <password> <FQDN/IP>```
+- ```xfreerdp /u:<user> /p:"<password>" /v:<FQDN/IP>```<br/>
+- ```rdesktop -u <user> -p <password> <FQDN/IP>```
