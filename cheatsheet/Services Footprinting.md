@@ -228,3 +228,17 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### 공유된 디렉토리 모든 파일에 대한 동기화
 ```rsync -av rsync://192.168.1.1/<share>```
+<br/><br/>
+# RDP(3389)
+
+### RDP 포트에 대한 서비스 스캔
+```nmap -sV -sC 192.168.1.1 -p3389 --script rdp*```
+
+### RDP 보안 체크
+```sudo cpan```<br/>
+```git clone https://github.com/CiscoCXSecurity/rdp-sec-check.git && cd rdp-sec-check```<br/>
+```./rdp-sec-check.pl 192.168.1.1```
+
+### RDP 연결
+```xfreerdp /u:<user> /p:"<password>" /v:<FQDN/IP>```<br/>
+```rdesktop -u <user> -p <password> <FQDN/IP>```
