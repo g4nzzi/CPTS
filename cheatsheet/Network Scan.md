@@ -108,8 +108,8 @@
 ```nmap 192.168.1.1 -p 445 -n --disable-arp-ping -Pn```
 
 #### DNS 프록싱(신뢰할 수 있는 DNS 서버를 지정 또는 소스포트를 53으로 설정)
-```nmap 192.168.1.1 --dns-server <ns>```<br/>
-```nmap 192.168.1.1 --source-port 53```
+- ```nmap 192.168.1.1 --dns-server <ns>```<br/>
+- ```nmap 192.168.1.1 --source-port 53```
 
 #### 필터 우회하여 연결 시도
 예) ```ncat -nv --source-port 53 192.168.1.1 50000```
@@ -158,11 +158,11 @@
 ```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f1,4;done```
 
 ### Shodan으로 추가 검색(IP주소 기준)
-```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f4 >> ip-addresses.txt;done```<br/>
-```for i in $(cat ip-addresses.txt);do shodan host $i;done```
+- ```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f4 >> ip-addresses.txt;done```<br/>
+-```for i in $(cat ip-addresses.txt);do shodan host $i;done```
 <br/><br/>
 # Cloud Resources
 
 ### Cloud 호스트 검색
-```for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f1,4;done```<br/>
-```[GrayHatWarfare](https://buckets.grayhatwarfare.com/)```
+- ```for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f1,4;done```<br/>
+- ```[GrayHatWarfare](https://buckets.grayhatwarfare.com/)```
