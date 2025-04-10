@@ -30,8 +30,7 @@
 ### 서브 도메인 Brute Forcing
 ```$ for sub in $(cat /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.domain.com @<nameserver> | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done```<br/>
 ```$ dnsenum --dnsserver <nameserver> --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt domain.com```
-
-
+<br/><br/>
 # SMB(139, 445)
 
 ### SMB 포트에 대한 서비스 스캔
@@ -61,7 +60,6 @@
 ```smbmap -H <IP>```<br/>
 ```crackmapexec smb <IP> --shares -u '' -p ''```<br/>
 ```enum4linux-ng.py <IP> -A```
-
 <br/><br/>
 # NFS(111, 2049)
 
@@ -75,7 +73,6 @@
 ### NFS share를 ./target-NFS에 마운트/언마운트
 ```mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
 ```umount ./target-NFS```
-
 <br/><br/>
 # SSH(22)
 
@@ -88,13 +85,11 @@
 
 ### SSH 클라이언트 인증방법 지정
 ```ssh -v 계정@192.168.1.1 -o PreferredAuthentications=password```
-
 <br/><br/>
 # WMI(135)
 
 ### Impacket-wmiexec를 이용한 WMI 연결 및 명령 실행
 ```wmiexec.py <user>:"<password>"@<FQDN/IP> "<system command>"```
-
 <br/><br/>
 # IMAP, POP3(143, 993, 110, 995)
 
@@ -109,7 +104,6 @@
 
 ### openssl을 이용한 POP3S service 연결
 ```openssl s_client -connect <FQDN/IP>:pop3s```
-
 <br/><br/>
 # R-Services(512, 513, 514)
 
@@ -121,7 +115,6 @@
 
 ### Rusers 명령으로 인증된 사용자 정보 확인
 ```rusers -al 192.168.1.1```
-
 <br/><br/>
 # MSSQL(1433)
 
@@ -130,7 +123,6 @@
 
 ### Windows 인증을 이용한 MSSQL 로그인
 ```impacket-mssqlclient <user>@<FQDN/IP> -windows-auth```
-
 <br/><br/>
 # MySQL(3306)
 
@@ -139,7 +131,6 @@
 
 ### MySQL 계정으로 로그인(-p 다음 공백 없음)
 ```mysql -u <user> -p<password> -h 192.168.1.1```
-
 <br/><br/>
 # Oracle(1521)
 
@@ -177,7 +168,6 @@ pip3 install pycryptodome
 ### Oracle RDBMS File Upload
 ```./odat.py utlfile -s <FQDN/IP> -d <db> -U <user> -P <pass> --sysdba --putFile C:\\insert\\path file.txt ./file.txt```<br/>
 예) ```./odat.py utlfile -s 192.168.1.1 -d XE -U scott -P tiger --sysdba --putFile C:\\inetpub\\wwwroot testing.txt ./testing.txt```
-
 <br/><br/>
 # SMTP(25)
 
@@ -196,7 +186,6 @@ pip3 install pycryptodome
 ```telnet 192.168.1.1 25```<br/>
 ```VRFY <user>```<br/>
 smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 192.168.1.1``` 
-
 <br/><br/>
 # SNMP(161, 162)
 
@@ -208,7 +197,6 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### braa를 이용한 OID Bruteforcing
 ```braa <community string>@<FQDN/IP>:.1.*```
-
 <br/><br/>
 # WinRM(5985, 5986)
 
@@ -217,7 +205,6 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### evil-winrm을 이용하여 원격 연결
 ```evil-winrm -i 192.168.1.1 -u <user> -p <password>```
-
 <br/><br/>
 # IPMI(623)
 
@@ -229,7 +216,6 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### IPMI hashes 덤프(MSF)
 ```msf6 auxiliary(scanner/ipmi/ipmi_dumphashes)```
-
 <br/><br/>
 # Rsync(873)
 
@@ -242,7 +228,6 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### 공유된 디렉토리 모든 파일에 대한 동기화
 ```rsync -av rsync://192.168.1.1/<share>```
-
 <br/><br/>
 # RDP(3389)
 
