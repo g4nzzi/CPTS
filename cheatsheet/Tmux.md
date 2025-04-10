@@ -16,7 +16,7 @@
 ```tmux kill-session -a```
 
 ### 마지막 session attach
-```tmux a```  ```tmux a -t <name>```
+```tmux a```   ```tmux a -t <name>```
 
 ### tmux 기본 prefix
 ```[Ctrl + b]```
