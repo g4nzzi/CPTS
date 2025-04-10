@@ -13,6 +13,7 @@
 ### FTP가 TLS/SSL 통신할 경우 openssl 사용
 ```openssl s_client -connect 192.168.1.1:21 -starttls ftp```
 
+<br/><br/>
 # DNS(53)
 
 ### 특정 nameserver로 NS 쿼리
@@ -31,6 +32,7 @@
 ```$ for sub in $(cat /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.domain.com @<nameserver> | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done```<br/>
 ```$ dnsenum --dnsserver <nameserver> --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt domain.com```
 
+<br/><br/>
 # SMB(139, 445)
 
 ### SMB 포트에 대한 서비스 스캔
@@ -61,6 +63,7 @@
 ```crackmapexec smb <IP> --shares -u '' -p ''```<br/>
 ```enum4linux-ng.py <IP> -A```
 
+<br/><br/>
 # NFS(111, 2049)
 
 ### NFS 포트에 대한 서비스 스캔
@@ -74,6 +77,7 @@
 ```mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
 ```umount ./target-NFS```
 
+<br/><br/>
 # SSH(22)
 
 ### SSH 서버 구성 및 알호화 알고리즘 정보
@@ -86,11 +90,13 @@
 ### SSH 클라이언트 인증방법 지정
 ```ssh -v 계정@192.168.1.1 -o PreferredAuthentications=password```
 
+<br/><br/>
 # WMI(135)
 
 ### Impacket-wmiexec를 이용한 WMI 연결 및 명령 실행
 ```wmiexec.py <user>:"<password>"@<FQDN/IP> "<system command>"```
 
+<br/><br/>
 # IMAP, POP3(143, 993, 110, 995)
 
 ### IMAP, POP3 포트에 대한 서비스 스캔
@@ -105,6 +111,7 @@
 ### openssl을 이용한 POP3S service 연결
 ```openssl s_client -connect <FQDN/IP>:pop3s```
 
+<br/><br/>
 # R-Services(512, 513, 514)
 
 ### R-Services 포트에 대한 서비스 스캔
@@ -116,6 +123,7 @@
 ### Rusers 명령으로 인증된 사용자 정보 확인
 ```rusers -al 192.168.1.1```
 
+<br/><br/>
 # MSSQL(1433)
 
 ### MSSQL 포트에 대한 서비스 스캔(hostname, database instance name, software version, named pipes)
@@ -124,6 +132,7 @@
 ### Windows 인증을 이용한 MSSQL 로그인
 ```impacket-mssqlclient <user>@<FQDN/IP> -windows-auth```
 
+<br/><br/>
 # MySQL(3306)
 
 ### MySQL 포트에 대한 서비스 스캔
@@ -132,6 +141,7 @@
 ### MySQL 계정으로 로그인(-p 다음 공백 없음)
 ```mysql -u <user> -p<password> -h 192.168.1.1```
 
+<br/><br/>
 # Oracle(1521)
 
 ### SID Bruteforcing을 위한 서비스 스캔
@@ -169,6 +179,7 @@ pip3 install pycryptodome
 ```./odat.py utlfile -s <FQDN/IP> -d <db> -U <user> -P <pass> --sysdba --putFile C:\\insert\\path file.txt ./file.txt```<br/>
 예) ```./odat.py utlfile -s 192.168.1.1 -d XE -U scott -P tiger --sysdba --putFile C:\\inetpub\\wwwroot testing.txt ./testing.txt```
 
+<br/><br/>
 # SMTP(25)
 
 ### SMTP 포트에 대한 서비스 스캔
@@ -187,6 +198,7 @@ pip3 install pycryptodome
 ```VRFY <user>```<br/>
 smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 192.168.1.1``` 
 
+<br/><br/>
 # SNMP(161, 162)
 
 #### snmpwalk를 이용한 OID 쿼리
@@ -198,6 +210,7 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 ### braa를 이용한 OID Bruteforcing
 ```braa <community string>@<FQDN/IP>:.1.*```
 
+<br/><br/>
 # WinRM(5985, 5986)
 
 ### WinRM 포트에 대한 서비스 스캔
@@ -206,6 +219,7 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 ### evil-winrm을 이용하여 원격 연결
 ```evil-winrm -i 192.168.1.1 -u <user> -p <password>```
 
+<br/><br/>
 # IPMI(623)
 
 ### IPMI 포트에 대한 서비스 스캔
@@ -217,6 +231,7 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 ### IPMI hashes 덤프(MSF)
 ```msf6 auxiliary(scanner/ipmi/ipmi_dumphashes)```
 
+<br/><br/>
 # Rsync(873)
 
 ### Rsync 포트에 대한 서비스 스캔
@@ -228,6 +243,7 @@ smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 
 
 ### 공유된 디렉토리 모든 파일에 대한 동기화
 ```rsync -av rsync://192.168.1.1/<share>```
+
 <br/><br/>
 # RDP(3389)
 
