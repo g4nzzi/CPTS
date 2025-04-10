@@ -169,21 +169,62 @@ pip3 install pycryptodome
 ```./odat.py utlfile -s <FQDN/IP> -d <db> -U <user> -P <pass> --sysdba --putFile C:\\insert\\path file.txt ./file.txt```<br/>
 예) ```./odat.py utlfile -s 192.168.1.1 -d XE -U scott -P tiger --sysdba --putFile C:\\inetpub\\wwwroot testing.txt ./testing.txt```
 
+# SMTP(25)
 
+### SMTP 포트에 대한 서비스 스캔
+```nmap 192.168.1.1 -sC -sV -p25```
 
-SNMP
-# Querying OIDs using snmpwalk
-snmpwalk -v2c -c <community string> <FQDN/IP>
+### SMTP 포트에 대한 Open Relay 스캔
+```nmap 192.168.1.1 -p25 --script smtp-open-relay -v```
 
-# Bruteforcing community strings of the SNMP service.
-onesixtyone -c community-strings.list <FQDN/IP>
+### Telnet - HELO/EHLO
+```telnet 192.168.1.1 25```<br/>
+```HELO mail1.domain.com```<br/>
+```EHLO mail1```
 
-# Bruteforcing SNMP service OIDs.
-braa <community string>@<FQDN/IP>:.1.*
+### Telnet - VRFY로 사용자 열거
+```telnet 192.168.1.1 25```<br/>
+```VRFY <user>```<br/>
+smtp-user-enum 툴 사용) ```smtp-user-enum -w 20 -M VRFY -U ./wordlist.txt -t 192.168.1.1``` 
 
-IPMI
-# IPMI version detection
-msf6 auxiliary(scanner/ipmi/ipmi_version)
+# SNMP(161, 162)
 
-# Dump IPMI hashes
-msf6 auxiliary(scanner/ipmi/ipmi_dumphashes)
+#### snmpwalk를 이용한 OID 쿼리
+```snmpwalk -v2c -c <community string> <FQDN/IP>```
+
+### SNMP service community string Bruteforcing
+```onesixtyone -c /opt/useful/SecLists/Discovery/SNMP/snmp.txt <FQDN/IP>```
+
+### braa를 이용한 OID Bruteforcing
+```braa <community string>@<FQDN/IP>:.1.*```
+
+# WinRM(5985, 5986)
+
+### WinRM 포트에 대한 서비스 스캔
+```nmap -sV -sC 10.129.201.248 -p5985,5986 --disable-arp-ping -n```
+
+### evil-winrm을 이용하여 원격 연결
+```evil-winrm -i 192.168.1.1 -u <user> -p <password>```
+
+# IPMI(623)
+
+### IPMI 포트에 대한 서비스 스캔
+```nmap -sU --script ipmi-version -p 623 192.168.1.1```
+
+### IPMI version 체크(MSF)
+```msf6 auxiliary(scanner/ipmi/ipmi_version)```
+
+### IPMI hashes 덤프(MSF)
+```msf6 auxiliary(scanner/ipmi/ipmi_dumphashes)```
+
+# Rsync(873)
+
+### Rsync 포트에 대한 서비스 스캔
+```nmap -sV -p 873 192.168.1.1```<br/>
+```nc -nv 192.168.1.1 873```
+
+### 공유 디렉토리 접근
+```rsync -av --list-only rsync://192.168.1.1/<share>```
+
+### 공유된 디렉토리 모든 파일에 대한 동기화
+```rsync -av rsync://192.168.1.1/<share>```
