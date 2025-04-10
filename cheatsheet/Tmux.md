@@ -22,7 +22,7 @@
 ```[Ctrl + b]```
 
 ### tmux logger 로깅 시작/중지 
-```prefix + [Shift + P]```
+```prefix + [Shift + p]```
 
 ### tmux 수직 화면 분할
 ```prefix + [Shift + %]```
@@ -31,4 +31,4 @@
 ```prefix + [Shift + "]```
 
 #### tmux 화면 전환
-```prefix + [Shift + O]```
+```prefix + [Shift + o]```
