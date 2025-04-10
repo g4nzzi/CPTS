@@ -159,7 +159,7 @@
 
 ### Shodan으로 추가 검색(IP주소 기준)
 - ```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f4 >> ip-addresses.txt;done```<br/>
--```for i in $(cat ip-addresses.txt);do shodan host $i;done```
+- ```for i in $(cat ip-addresses.txt);do shodan host $i;done```
 <br/><br/>
 # Cloud Resources
 
