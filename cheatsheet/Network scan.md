@@ -73,12 +73,12 @@
 #### 가장 느린(0) 스캔, IDS 우회
 ```nmap 192.168.1.1 -T 0```
 
-#### 기본 -T3
+#### 기본값은 -T 3
 
 #### 가장 빠른(5) 스캔; 빠른 네트워크 환경에서 사용
 ```nmap 192.168.1.1 -T 5```
 
-#### 초당 <number> 이상 packet 전송
+#### 최소 number 이상 packet 전송
 ```nmap 192.168.1.1 --min-rate 1000```
 
 ### NSE Scripts
@@ -121,13 +121,10 @@
 ### Output
 #### 일반 output file
 ```nmap 192.168.1.1 -oN scan.txt```
-```- `.nmap`파일 확장자를 포함한 일반 출력( `-oN`)
-- `.gnmap`파일 확장자를 포함한 Grep 가능한 출력( `-oG`)
-- `.xml`파일 확장자를 포함한 XML 출력( `-oX`)
-- 모든 형식 출력( `-oA`)```
-
-### 3가지 major format file
-```nmap 192.168.1.1 -oA scan```
+- .nmap파일 확장자를 포함한 일반 출력(-oN)
+- .gnmap파일 확장자를 포함한 Grep 가능한 출력(-oG)
+- .xml파일 확장자를 포함한 XML 출력(-oX)
+- 모든 형식 출력(-oA)
 
 
 # Rustscan
