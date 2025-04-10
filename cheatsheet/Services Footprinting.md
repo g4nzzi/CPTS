@@ -13,7 +13,7 @@
 ### FTP가 TLS/SSL 통신할 경우 openssl 사용
 ```openssl s_client -connect 192.168.1.1:21 -starttls ftp```
 
-<br/><br/>
+<br/>
 # DNS(53)
 
 ### 특정 nameserver로 NS 쿼리
