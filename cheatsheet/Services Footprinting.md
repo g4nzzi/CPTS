@@ -99,10 +99,10 @@
 ### curl을 이용한 IMAPS service 로그인
 ```curl -k 'imaps://<FQDN/IP>' --user <user>:<password>```
 
-# openssl을 이용한 IMAPS service 연결
+### openssl을 이용한 IMAPS service 연결
 ```openssl s_client -connect <FQDN/IP>:imaps```
 
-# openssl을 이용한 POP3S service 연결
+### openssl을 이용한 POP3S service 연결
 ```openssl s_client -connect <FQDN/IP>:pop3s```
 
 # R-Services(512, 513, 514)
