@@ -125,8 +125,7 @@
 - .gnmap파일 확장자를 포함한 Grep 가능한 출력(-oG)
 - .xml파일 확장자를 포함한 XML 출력(-oX)
 - 모든 형식 출력(-oA)
-
-
+<br/><br/>
 # Rustscan
 
 ### 기본 스캔
@@ -146,3 +145,24 @@
 
 ### 포트 범위 스캔
 ```rustscan -a www.host.com --range 1-1000```
+<br/><br/>
+# 도메인 정보 검색
+
+### crt.sh로 검색(Certificate Transparency 로그)
+```curl -s https://crt.sh/\?q\=<target-domain>\&output\=json | jq .```
+
+### 하위 도메인 기준 필터링
+```curl -s https://crt.sh/\?q\=<target-domain>\&output\=json | jq . | grep name | cut -d":" -f2 | grep -v "CN=" | cut -d'"' -f2 | awk '{gsub(/\\n/,"\n");}1;' | sort -u```
+
+### 호스트 직접 검색
+```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f1,4;done```
+
+### Shodan으로 추가 검색(IP주소 기준)
+```for i in $(cat subdomainlist);do host $i | grep "has address" | grep <target-domain> | cut -d" " -f4 >> ip-addresses.txt;done```<br/>
+```for i in $(cat ip-addresses.txt);do shodan host $i;done```
+<br/><br/>
+# Cloud Resources
+
+### Cloud 호스트 검색
+```for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f1,4;done```<br/>
+```[GrayHatWarfare](https://buckets.grayhatwarfare.com/)```
