@@ -31,7 +31,7 @@
 ```$ for sub in $(cat /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.domain.com @<nameserver> | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done```<br/>
 ```$ dnsenum --dnsserver <nameserver> --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt domain.com```
 
-<br/><br/>
+
 # SMB(139, 445)
 
 ### SMB 포트에 대한 서비스 스캔
