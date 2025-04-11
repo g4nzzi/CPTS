@@ -45,7 +45,7 @@ sudo vi /etc/hosts
 
 gobuster vhost -u http://domain.com:44045 -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain
 ```
-<br/><br/>
+<br/>
 ## Certificate Transparency 도구
 | 도구                                  | 주요 특징                                                         | 사용 사례                                      | 장점                          | 단점                       |
 | ----------------------------------- | ------------------------------------------------------------- | ------------------------------------------ | --------------------------- | ------------------------ |
@@ -84,7 +84,7 @@ wget -O ReconSpider.zip https://academy.hackthebox.com/storage/modules/144/Recon
 unzip ReconSpider.zip
 python3 ReconSpider.py http://domain.com
 ```
-<br/><br/>
+<br/>
 # Search Engine 검색
 
 ### 검색 연산자
