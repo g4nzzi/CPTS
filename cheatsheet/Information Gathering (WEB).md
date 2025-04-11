@@ -1,4 +1,4 @@
-# WHOIS
+# 1. WHOIS
 
 ### 도메인 정보 수집
 ```whois domain.com```
