@@ -1,5 +1,5 @@
 # 일반 Hash Type
-
+```
 Hash-Mode	Hash-Name	Example
 0	MD5	8743b52063cd84097a65d1633f5c74f5
 10	md5($pass.$salt)	01dfae6e5d4d90d9892622325959afbe:7050461
@@ -237,10 +237,10 @@ Joomla (MD5)	$P$984478476IagS59wHZvyQMArzfx58u.
 16400*	CRAM-MD5 Dovecot	{CRAM-MD5}5389b33b9725e5657cb631dc50017ff1535ce4e2a1c414009126506fc4327d0d
 16500*	JWT (JSON Web Token)	eyJhbGciOiJIUzI1NiJ9.eyIzNDM2MzQyMCI6NTc2ODc1NDd9.f1nXZ3V_Hrr6ee-AFCTLaHRnrkiKmio2t3JqwL32guY
 16600*	Electrum Wallet (Salt-Type 1-3)	$electrum$1*44358283104603165383613672586868*c43a6632d9f59364f74c395a03d8c2ea
-99999	Plaintext	hashcat
+```
 <br/><br/>
 # 특정 플랫폼 Hash Type
-
+```
 Hash-Mode	Hash-Name	Example
 11	Joomla < 2.5.18	19e0e8d91c722e7091ca7a6a6fb0f4fa:54718031842521651757785603028777
 12	PostgreSQL	a6343a68d964ca596d9752250d54bb8a:postgres
@@ -272,3 +272,4 @@ Hash-Mode	Hash-Name	Example
 4521	Redmine	1fb46a8f81d8838f46879aaa29168d08aa6bf22d:3290afd193d90e900e8021f81409d7a9
 4522	PunBB	4a2b722cc65ecf0f7797cdaea4bce81f66716eef:653074362104
 12001	Atlassian (PBKDF2-HMAC-SHA1)	{PKCS5S2}NzIyNzM0NzY3NTIwNjI3MdDDis7wPxSbSzfFqDGf7u/L00kSEnupbz36XCL0m7wa
+```
