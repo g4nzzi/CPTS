@@ -168,10 +168,10 @@ Test-NetConnection -ComputerName <hostname> -Port 5985
 $Session = New-PSSession -ComputerName <hostname>
 ```
 
-### 로컬 파일을 <hostname>으로 복사
+### 로컬 파일을 host로 복사
 ```Copy-Item -Path C:\samplefile.txt -ToSession $Session -Destination C:\Users\Administrator\Desktop\```
 
-### <hostname> 파일을 로컬로 복사
+### host의 파일을 로컬로 복사
 ```Copy-Item -Path "C:\Users\Administrator\Desktop\DATABASE.txt" -Destination C:\ -FromSession $Session```
 <br/><br/>
 ## RDP
