@@ -94,7 +94,7 @@ cat <&3
 
 <br/><br/>
 # Upload
-<br/><br/>
+
 ## Windows
 
 ### PowerShell Web Upload
@@ -144,7 +144,7 @@ python3 -m uploadserver 443 --server-certificate ~/server.pem
 
 <br/><br/>
 # File Transfer
-<br/><br/>
+
 ## Netcat 
 
 ### nc로 수신 대기
