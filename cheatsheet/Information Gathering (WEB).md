@@ -18,7 +18,7 @@
 ### dnsenum 도구 명령
 ```dnsenum --enum domain.com -f /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -r```
 
-### DNS 서버에 domain.com 도메인 전체 zone transfer(axfr)을 요청
+### DNS 서버에 도메인 전체 zone transfer(axfr)을 요청
 ```dig axfr @<DNS> domain.com```
 <br/><br/>
 ## Virtual Host 검색 도구
