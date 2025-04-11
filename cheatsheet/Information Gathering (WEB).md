@@ -1,9 +1,9 @@
-# 1. WHOIS
+# 1.WHOIS
 
 ### 도메인 정보 수집
 ```whois domain.com```
 <br/><br/>
-# 2. DNS
+# 2.DNS
 
 ### DNS Tools
 ```dig domain.com```<br/>
@@ -55,7 +55,7 @@ gobuster vhost -u http://domain.com:44045 -w /usr/share/seclists/Discovery/DNS/s
 ### crt.sh 조회 명령
 ```curl -s "https://crt.sh/?q=domain.com&output=json" | jq -r '.[] | select(.name_value | contains("dev")) | .name_value' | sort -u```
 <br/><br/>
-# 3. Fingerprinting
+# 3.Fingerprinting
 
 ### curl 명령
 ```curl -I inlanefreight.com```
@@ -75,7 +75,7 @@ chmod +x ./nikto.pl
 ```
 ```nikto -h <domain> -Tuning b```
 <br/><br/>
-# 4. Crawling
+# 4.Crawling
 
 ### Scrapy 툴(ReconSpider) 명령
 ```
@@ -85,7 +85,7 @@ unzip ReconSpider.zip
 python3 ReconSpider.py http://domain.com
 ```
 <br/><br/>
-# Search Engine 검색
+# 5.Search Engine 검색
 
 ### 검색 연산자
 | 연산자                  | 운영자 설명                             | 예                                                   | 예시 설명                                                           |
@@ -126,10 +126,10 @@ python3 ReconSpider.py http://domain.com
     - `site:example.com inurl:backup`
     - `site:example.com filetype:sql`
 <br/><br/>
-# 5. Wayback Machine 검색
+# 6. Wayback Machine 검색
 ```https://web.archive.org/ 접속하여 사이트 스냅샷 검색```
 <br/><br/>
-# 6. Auto Recon Framework
+# 7. Auto Recon Framework
 - [FinalRecon](https://github.com/thewhiteh4t/FinalRecon) : SSL 인증서 검사, Whois 정보 수집, 헤더 분석, 크롤링과 같은 다양한 작업을 위한 다양한 모듈을 제공하는 Python 기반 정찰 도구입니다. 모듈식 구조로 특정 요구 사항에 맞게 쉽게 사용자 정의할 수 있습니다.
 - [Recon-ng](https://github.com/lanmaster53/recon-ng) : 다양한 정찰 작업을 위한 다양한 모듈이 있는 모듈식 구조를 제공하는 Python으로 작성된 강력한 프레임워크입니다. DNS 열거, 하위 도메인 검색, 포트 스캐닝, 웹 크롤링을 수행하고 알려진 취약성을 악용할 수도 있습니다.
 - [theHarvester](https://github.com/laramies/theHarvester) : 검색 엔진, PGP 키 서버, SHODAN 데이터베이스와 같은 다양한 공개 소스에서 이메일 주소, 하위 도메인, 호스트, 직원 이름, 오픈 포트, 배너를 수집하도록 특별히 설계되었습니다. Python으로 작성된 명령줄 도구입니다.
