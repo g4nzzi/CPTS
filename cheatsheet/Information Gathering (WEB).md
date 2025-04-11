@@ -2,7 +2,7 @@
 
 ### 도메인 정보 수집
 ```whois domain.com```
-
+<br/><br/>
 # DNS
 
 ## DNS Bruteforce 도구
@@ -30,8 +30,9 @@
 
 ### gobuster 도구 명령
 ```gobuster vhost -u http://<target_IP_address> -w <wordlist_file> --append-domain```
-```
+
 사용 예)
+```
 sudo vi /etc/hosts
 ...
 <IP주소>  domain.com
