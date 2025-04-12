@@ -1,5 +1,5 @@
-# CPTS
+# CPTS Note
 
-#### Certified Penetration Testing Specialist(CPTS) Note
+### HackTheBox Certified Penetration Testing Specialist(CPTS) Note
 <br/><br/>
 ![image](https://github.com/user-attachments/assets/ca0ee51c-1978-4cae-9805-cc0e4094ea32)
