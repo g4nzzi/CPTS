@@ -1,4 +1,4 @@
-# 1.John The Ripper
+# 1. John The Ripper
 
 ### Single Crack Mode
 ```john --format=<hash_type> <hash or hash_file>```
