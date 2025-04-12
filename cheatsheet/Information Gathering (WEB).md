@@ -1,9 +1,9 @@
-# 1.WHOIS
+# 1. WHOIS
 
 ### 도메인 정보 수집
 ```whois domain.com```
 <br/><br/>
-# 2.DNS
+# 2. DNS
 
 ### DNS Tools
 ```dig domain.com```<br/>
@@ -55,7 +55,7 @@ gobuster vhost -u http://domain.com:44045 -w /usr/share/seclists/Discovery/DNS/s
 ### crt.sh 조회 명령
 ```curl -s "https://crt.sh/?q=domain.com&output=json" | jq -r '.[] | select(.name_value | contains("dev")) | .name_value' | sort -u```
 <br/><br/>
-# 3.Fingerprinting
+# 3. Fingerprinting
 
 ### curl 명령
 ```curl -I inlanefreight.com```
@@ -75,7 +75,7 @@ chmod +x ./nikto.pl
 ```
 ```nikto -h <domain> -Tuning b```
 <br/><br/>
-# 4.Crawling
+# 4. Crawling
 
 ### Scrapy 툴(ReconSpider) 명령
 ```
@@ -85,7 +85,7 @@ unzip ReconSpider.zip
 python3 ReconSpider.py http://domain.com
 ```
 <br/><br/>
-# 5.Search Engine 검색
+# 5. Search Engine 검색
 
 ### 검색 연산자
 | 연산자                  | 운영자 설명                             | 예                                                   | 예시 설명                                                           |
