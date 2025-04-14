@@ -251,7 +251,9 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 | `Get-DomainTrustMapping`            | 현재 도메인에 대한 모든 신뢰와 그 외에 발견된 모든 신뢰를 나열합니다.          |
 
 ### Domain User Information
-```Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol```
+```
+Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
+```
 
 ### 재귀적 Group Membership
 ```Get-DomainGroupMember -Identity "Domain Admins" -Recurse```
