@@ -586,7 +586,7 @@ Get-ObjectAcl "DC=inlanefreight,DC=local" -ResolveGUIDs | ? { ($_.ObjectAceType 
 - 특정 사용자 : ```-just-dc-user <USERNAME> 플래그```<br/>
 - 비밀번호 마지막 변경시기 : ```-pwd-last-set 플래그```<br/>
 - 비밀번호 크래킹 보충 데이터 : ```-history 플래그```<br/>
-- 비활성화 사용자 확인 : `-user-status 플래그```
+- 비활성화 사용자 확인 : ```-user-status 플래그```
 
 ### Get-ADUser를 사용하여 추가 열거 (Reversible 암호화(RC4) 계정)
 ```Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl```
@@ -838,6 +838,11 @@ Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
 
 ### GPO GUID를 이름으로 변환
 ```Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532```
+
+<br/><br/>
+# Domain Trusts Primer
+
+## 
 
 
 
