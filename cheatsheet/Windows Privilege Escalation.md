@@ -229,8 +229,8 @@ mimikatz # sekurlsa::logonpasswords
 
 - [다른 도구](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
 
->  참고 사이트 1 : https://steflan-security.com/windows-privilege-escalation-cheat-sheet/
->  참고 사이트 2 : https://book.martiandefense.llc/notes/network-security/windows-privesc/windows-user-privileges 
+> 참고 사이트 1 : https://steflan-security.com/windows-privilege-escalation-cheat-sheet/<br/>
+> 참고 사이트 2 : https://book.martiandefense.llc/notes/network-security/windows-privesc/windows-user-privileges 
 
 
 
