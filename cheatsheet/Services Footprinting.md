@@ -60,6 +60,14 @@
 - ```smbmap -H <IP>```<br/>
 - ```crackmapexec smb <IP> --shares -u '' -p ''```<br/>
 - ```enum4linux-ng.py <IP> -A```
+
+<br/><br/>
+# RPC(111)
+
+### RPC 정보 확인
+- 참고 : https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-rpcbind.html
+```rpcinfo 192.168.1.1```
+
 <br/><br/>
 # NFS(111, 2049)
 
