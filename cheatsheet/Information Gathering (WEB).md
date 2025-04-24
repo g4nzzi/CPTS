@@ -25,6 +25,7 @@
 
 ### DNS 서버에 도메인 전체 zone transfer(axfr)을 요청
 ```dig axfr @<DNS> domain.com```
+
 <br/><br/>
 ## Virtual Host 검색 도구
 | 도구                                                   | 설명                                                        | 특징                                                |
@@ -45,6 +46,18 @@ sudo vi /etc/hosts
 
 gobuster vhost -u http://domain.com:44045 -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain
 ```
+
+<br/><br/>
+## Directory, Page 검색
+
+### gobuster 명령
+- Directory 검색 : ```gobuster dir -u http://domain.com/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt```<br/>
+- Page 검색
+```
+gobuster dir -u http://domain.com -w /usr/share/seclists/Discovery/Web-Content/common.txt
+gobuster dir -u http://domain.com -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -x php -t 40 -o tracking-dir-php
+```
+
 <br/><br/>
 ## Certificate Transparency 도구
 | 도구                                  | 주요 특징                                                         | 사용 사례                                      | 장점                          | 단점                       |
