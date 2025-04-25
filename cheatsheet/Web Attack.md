@@ -856,6 +856,7 @@ Invoke-DOSfuscation\Encoding> 1
 | `DELETE`  | 지정된 위치의 리소스를 삭제합니다.                           |
 | `OPTIONS` | 웹 서버에서 허용하는 다양한 옵션(허용되는 HTTP 동사 등)을 보여줍니다.    |
 | `PATCH`   | 지정된 위치의 리소스에 부분 수정을 적용합니다.                    |
+| `TRACE`   | 리소스 경로를 따라 메시지 Loop-Back 테스트를 합니다.(TRACK 도 동일)      |
 
 ```curl -i -X OPTIONS http://SERVER_IP:PORT/```
 
