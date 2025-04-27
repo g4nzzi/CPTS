@@ -250,6 +250,7 @@ nc -lnvp 443
 # Privileged Groups
 
 ## LXC / LXD (Docker와 유사)
+```uid=1009(devops) gid=1009(devops) groups=1009(devops),110(lxd)```<br/>
 ```
 unzip alpine.zip
 lxd init
@@ -267,6 +268,7 @@ lxc exec r00t /bin/sh
 ```debugfs```
 
 ## ADM 
+```uid=1010(secaudit) gid=1010(secaudit) groups=1010(secaudit),4(adm)```<br/>
 ```ls -al /var/log```
 
 <br/><br/>
