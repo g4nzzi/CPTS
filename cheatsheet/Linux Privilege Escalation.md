@@ -261,11 +261,12 @@ lxc exec r00t /bin/sh
 ```
 
 ## Docker
+```docker run -v /root:/mnt -it ubuntu```
 
-### Disk
+## Disk
 ```debugfs```
 
-### ADM 
+## ADM 
 ```ls -al /var/log```
 
 <br/><br/>
