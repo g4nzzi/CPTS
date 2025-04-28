@@ -79,8 +79,9 @@
 ```showmount -e <IP>```
 
 ### NFS share를 ./target-NFS에 마운트/언마운트
-- ```mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
-- ```umount ./target-NFS```
+-```mkdir target-NFS```<br/>
+- ```sudo mount -t nfs <FQDN/IP>:/<share> ./target-NFS/ -o nolock```<br/>
+- ```sudo umount ./target-NFS```
 <br/><br/>
 # SSH(22)
 
