@@ -27,6 +27,9 @@
 ## tmux logger 로깅 시작/중지 
 ```prefix + [Shift + p]```
 
+## tmux logger 로깅 소급 적용 
+```prefix + [Alt + Shift + p]```
+
 ## tmux 수평 화면 분할
 ```prefix + [Shift + "]```
 
