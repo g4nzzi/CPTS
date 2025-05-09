@@ -30,11 +30,14 @@
 ## tmux logger 로깅 소급 적용 
 ```prefix + [Alt + Shift + p]```
 
+## tmux 화면 스크롤 켜기
+```prefix + [Shift + [ ]```
+
 ## tmux 수평 화면 분할
-```prefix + [Shift + "]```
+```prefix + [Shift + " ]```
 
 ### tmux 수직 화면 분할
-```prefix + [Shift + %]```
+```prefix + [Shift + % ]```
 
 ## tmux 분할화면 이동
 ```prefix + [방향키]```
