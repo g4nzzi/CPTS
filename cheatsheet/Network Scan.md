@@ -125,6 +125,10 @@
 - .gnmap파일 확장자를 포함한 Grep 가능한 출력(-oG)
 - .xml파일 확장자를 포함한 XML 출력(-oX)
 - 모든 형식 출력(-oA)
+
+### Nmap grep cheatsheet
+- [cheatsheet](https://github.com/leonjza/awesome-nmap-grep)
+
 <br/><br/>
 # Rustscan
 
