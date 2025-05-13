@@ -163,7 +163,7 @@ PowerShell : ```Get-WmiObject -Class Win32_Product |  select Name, Version```
 ## SeImpersonate 예 - JuicyPotato
 
 ### MSSQLClient.py로 연결하기
-- Impacket` 툴킷의 [mssqlclient.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/mssqlclient.py)
+- Impacket` 툴킷의 [mssqlclient.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/mssqlclient.py)<br/>
 ```mssqlclient.py sql_dev@10.129.43.30 -windows-auth```
 
 ### xp_cmdshell 활성화
