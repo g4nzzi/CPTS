@@ -21,7 +21,7 @@
 ### 특정 nameserver DNS Version 쿼리
 ```dig CH TXT version.bind <nameserver>```
 
-### 특정 nameserver러 ANY 쿼리(공개된 항목 보기)
+### 특정 nameserver로 ANY 쿼리(공개된 항목 보기)
 ```dig any <domain> @<nameserver>```
 
 ### 특정 nameserver로 AXFR 쿼리
