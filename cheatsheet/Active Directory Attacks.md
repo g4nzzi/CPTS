@@ -31,6 +31,7 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt | tee v
 
 ### Responder - Linux
 ```sudo responder -I ens224```<br/>
+로그 위치 : /usr/share/responder/logs<br/>
 ```hashcat -m 5600 forend_ntlmv2 /usr/share/wordlists/rockyou.txt```
 
 ### Inveigh - Windows
