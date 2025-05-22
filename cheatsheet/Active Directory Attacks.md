@@ -49,7 +49,7 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt | tee v
 <br/><br/>
 ## 4. Password Spraying
 
-### 비밀번호 정책 열거 - 자격증명 (Linux)
+### 비밀번호 정책 열거 - 자격증명 있을 경우 (Linux)
 ```crackmapexec smb 172.16.5.5 -u avazquez -p Password123 --pass-pol```
 
 ### 비밀번호 정책 열거 - SMB NULL Sessions (Linux)
