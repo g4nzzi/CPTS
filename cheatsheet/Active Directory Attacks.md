@@ -87,7 +87,8 @@ rpcclient $> enumdomusers
 
 ### LDAP Anonymous를 사용하여 사용자 수집
 ```ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "```<br/>
-```./windapsearch.py --dc-ip 172.16.5.5 -u "" -U```
+```./windapsearch.py --dc-ip 172.16.5.5 -u "" -U```<br/>
+```crackmapexec ldap 172.16.5.5 -u "" -p "" --users```
 
 ### Kerbrute를 사용하여 사용자 열거
 ```kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt```
