@@ -54,7 +54,8 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt | tee v
 
 ### 비밀번호 정책 열거 - SMB NULL Sessions (Linux)
 ```rpcclient -U "" -N 172.16.5.5```<br/>
-```rpcclient $> querydominfo```
+도메인 정보 : ```rpcclient $> querydominfo```</br>
+비밀번호 정책 : ```rpcclient $> getdompwinfo```
 
 ### 비밀번호 정책 열거 - enum4linux (Linux)
 ```enum4linux -P 172.16.5.5```<br/>
