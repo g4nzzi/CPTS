@@ -71,7 +71,7 @@ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt | tee v
 ```net use \\DC01\ipc$ "password" /u:guest```   # Password 비일치 또는 계정 잠김 확인
 
 ### 비밀번호 정책 열거 (Windows)
-```net accounts```
+내장 명령 : ```net accounts```
 ```
 import-module .\PowerView.ps1
 Get-DomainPolicy
