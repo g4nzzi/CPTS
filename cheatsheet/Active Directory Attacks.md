@@ -24,7 +24,7 @@ make help
 sudo make all
 ls dist/
 sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
-kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt -o valid_ad_users
+kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 /opt/jsmith.txt | tee valid_ad_users
 ```
 <br/><br/>
 ## 3. LLMNR & NBT-NS Sniffing
