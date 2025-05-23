@@ -126,8 +126,8 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 <br/><br/>
 ## 7. 보안 설정 Enumerating
 
-### Windows Defender 상태 체크 (PowerShell)
-```Get-MpComputerStatus```
+### Windows Defender 상태 체크
+```Get-MpComputerStatus``` : RealTimeProtectionEnabled 값 체크
 
 ### AppLocker 체크
 ```Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections```
