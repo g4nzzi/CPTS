@@ -273,7 +273,7 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 ```Test-AdminAccess -ComputerName ACADEMY-EA-MS01```<br/>
 : 현재 사용중인 사용자가 호스트 ACADEMY-EA-MS01의 관리자인지 확인
 
-### SPN Set으로 User 찾기
+### SPN 속성 세트가 있는 사용자 찾기 (Kerberoasting 공격 가능)
 ```Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName```
 
 ### SharpView를 사용하여 특정 사용자 정보 열거
