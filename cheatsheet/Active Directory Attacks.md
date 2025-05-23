@@ -263,7 +263,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
 ```
 
-### 재귀적 Group Membership
+### 재귀적 Group Membership (중첩된 그룹의 맴버쉽까지 나열)
 ```Get-DomainGroupMember -Identity "Domain Admins" -Recurse```
 
 ### Trust Enumeration
