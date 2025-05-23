@@ -302,7 +302,7 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 | `echo %USERDOMAIN%`                                     | 호스트가 속한 도메인 이름을 표시합니다(CMD 프롬프트에서 실행)           |
 | `echo %logonserver%`                                    | 호스트가 체크인하는 도메인 컨트롤러의 이름을 인쇄합니다(CMD 프롬프트에서 실행). |
 
-```systeminfo``` : 명령으로 한번에 확인 가능
+```systeminfo``` 명령으로 한번에 확인 가능
 
 ### PowerShell 활용
 
