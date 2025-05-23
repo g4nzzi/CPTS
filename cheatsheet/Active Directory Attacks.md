@@ -201,22 +201,22 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```Import-Module ActiveDirectory```<br/>
 ```Get-Module```
 
-### Get Domain Info
+### Get Domain Info (도메인 SID, 도메인 기능 수준, 모든 자식 도메인 등)
 ```Get-ADDomain```
 
-### Get-ADUser
+### Get-ADUser (`ServicePrincipalName` 속성이 채워진 계정 필터링)
 ```Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName```
 
-### Trust Relationships 체크
+### Trust Relationships 체크 (도메인이 가진 모든 신뢰 관계 출력)
 ```Get-ADTrust -Filter *```
 
-### Group Enumeration
+### Group Enumeration (AD 그룹 정보 수집)
 ```Get-ADGroup -Filter * | select name```
 
 ### 상세 Group Info
 ```Get-ADGroup -Identity "Backup Operators"```
 
-### Group Membership
+### Group Membership (멤버 목록 확인)
 ```Get-ADGroupMember -Identity "Backup Operators"```
 
 ### PowerView
