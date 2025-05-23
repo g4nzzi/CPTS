@@ -162,7 +162,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ### SMBMap사용하여 Access 체크
 ```smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5```
 
-### SMBMap사용하여 모든 디렉토리 열거
+### SMBMap사용하여 재귀적 모든 디렉토리 열거 (파일 제외)
 ```smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only```
 
 ### rpcclient를 사용한 SMB Null Session 체크
