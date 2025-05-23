@@ -189,7 +189,8 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU```
 
 ### BloodHound.py 실행
-```sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all```
+```sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all```<br/>
+결과 ZIP으로 압축 : ````zip -r <name>.zip *.json````
 
 <br/><br/>
 ## 9. 자격증명 Enumerating - from Windows
