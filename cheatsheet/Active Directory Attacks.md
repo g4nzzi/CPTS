@@ -133,7 +133,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections```
 
 ### Enumerating Language Mode (PowerShell)
-```$ExecutionContext.SessionState.LanguageMode```
+```$ExecutionContext.SessionState.LanguageMode``` : 전체 언어 모드인지 제한 언어 모드인지 빠르게 확인
 
 ### LAPS(Local Administrator Password Solution) 체크
 ```Find-LAPSDelegatedGroups``` : LAPS 암호를 읽을 수 있는 사용자 계정 확인<br/>
