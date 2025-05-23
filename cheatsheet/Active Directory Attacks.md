@@ -389,7 +389,7 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 > Trick : net 명령 대신 net1 입력으로 탐지 우회 가능
 
 ### Dsquery 명령 (Active Directory 개체 찾기)
-``` dsquery user```<br/>
+```dsquery user```<br/>
 ```dsquery computer```<br/>
 ```dsquery * "CN=Users,DC=INLANEFREIGHT,DC=LOCAL"```<br/>
 
