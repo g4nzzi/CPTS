@@ -285,6 +285,8 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 ### SharpHound 실행
 ```SharpHound.exe -c All --zipfilename <outfile>```
 
+### BloodHound Raw Query 참고 : [custom Cypher queries](https://hausec.com/2019/09/09/bloodhound-cypher-cheatsheet/)
+
 <br/><br/>
 ## 10. Living Off the Land
 
