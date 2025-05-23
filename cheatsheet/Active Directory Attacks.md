@@ -136,9 +136,9 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```$ExecutionContext.SessionState.LanguageMode```
 
 ### LAPS(Local Administrator Password Solution) 체크
-```Find-LAPSDelegatedGroups```<br/>
-```Find-AdmPwdExtendedRights```<br/>
-```Get-LAPSComputers```
+```Find-LAPSDelegatedGroups``` : LAPS 암호를 읽을 수 있는 사용자 계정 확인<br/>
+```Find-AdmPwdExtendedRights``` : "모든 확장 권한"을 가진 사용자 확인(LAPS 비밀번호를 읽을 수 있음)<br/>
+```Get-LAPSComputers``` : 비밀번호가 만료되었을 때 무작위로 추출된 비밀번호를 일반 텍스트로 검색 가능
 
 <br/><br/>
 ## 8. 자격증명 Enumerating - from Linux
