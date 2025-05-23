@@ -192,6 +192,8 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all```<br/>
 결과 ZIP으로 압축 : ````zip -r <name>.zip *.json````
 
+### 참고 cheat sheet : [WADComs](https://wadcoms.github.io/)
+
 <br/><br/>
 ## 9. 자격증명 Enumerating - from Windows
 
