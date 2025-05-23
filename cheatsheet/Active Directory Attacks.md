@@ -321,13 +321,14 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 ```Get-ChildItem Env: | ft key,value```
 
 ### Powershell 다운그레이드 (로깅 우회용)
-```powershell.exe -version 2```
+```powershell.exe -version 2``` : 명령 실행 자체는 흔적 남음<br/>
+```Get-host```
 
 ### Firewall 체크
 ```netsh advfirewall show allprofiles```
 
 ### Windows Defender 체크
-```sc query windefend```     # 실행 여부 확인<br/>
+```sc query windefend```     # 실행 여부 확인(from CMD.exe)<br/>
 ```Get-MpComputerStatus```   # 상태 및 구성 확인
 
 ### 로그인한 다른 사용자 확인
