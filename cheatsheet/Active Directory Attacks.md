@@ -271,7 +271,7 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 
 ### Local Admin Access 테스트
 ```Test-AdminAccess -ComputerName ACADEMY-EA-MS01```<br/>
-: 현재 사용 중인 사용자가 호스트 ACADEMY-EA-MS01의 관리자임을 확인
+: 현재 사용중인 사용자가 호스트 ACADEMY-EA-MS01의 관리자인지 확인
 
 ### SPN Set으로 User 찾기
 ```Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName```
