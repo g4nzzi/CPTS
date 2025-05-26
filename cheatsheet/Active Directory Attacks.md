@@ -460,7 +460,7 @@ mimikatz # kerberos::list /export
 
 ### 2-1) 자동 방법
 
-### TGS Tickets 추출을 위한 PowerView 사용
+### PowerView 사용하여 SPN 열거
 ```
 Import-Module .\PowerView.ps1
 Get-DomainUser * -spn | select samaccountname
