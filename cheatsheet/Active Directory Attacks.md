@@ -145,6 +145,10 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 
 ### 도메인 사용자 열거
 ```sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users```
+```
+사용자명 추출 : sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users > user.txt
+               cat user.txt | cut -f2 -d"\\" | cut -f1 -d" " > user_list.txt
+```
 
 ### 도메인 그룹 열거
 ```sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups```
