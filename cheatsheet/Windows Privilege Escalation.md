@@ -13,8 +13,8 @@
 | [Windows Exploit Suggester - Next Generation](https://github.com/bitsadmin/wesng)                        | WES-NG는 Windows의 `systeminfo` 유틸리티의 출력을 기반으로 하는 도구로, OS가 취약한 취약성 목록을 제공하며, 이러한 취약성에 대한 모든 익스플로잇도 포함합니다. Windows XP와 Windows 10 사이의 모든 Windows OS, Windows Server 대응 제품을 포함하여 지원됩니다.                                                                                                                                                                             |
 | [Sysinternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)         | 우리는 [AccessChk](https://docs.microsoft.com/en-us/sysinternals/downloads/accesschk) , [PipeList](https://docs.microsoft.com/en-us/sysinternals/downloads/pipelist) , [PsService를](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice) 포함한 Sysinternals의 여러 도구를 열거에 사용할 것입니다.[](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice) |
 
-- `Seatbelt`와 `SharpUp`의 사전 컴파일된 바이너리([here](https://github.com/r3motecontrol/Ghostpack-CompiledBinaries)
-- `LaZagne`의 독립형 바이너리([here](https://github.com/AlessandroZ/LaZagne/releases/)
+- `Seatbelt`와 `SharpUp`의 사전 컴파일된 바이너리([here](https://github.com/r3motecontrol/Ghostpack-CompiledBinaries))
+- `LaZagne`의 독립형 바이너리([here](https://github.com/AlessandroZ/LaZagne/releases/))
 
 <br/><br/>
 # 상황 인식
