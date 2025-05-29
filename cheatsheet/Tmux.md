@@ -1,6 +1,6 @@
 # Tmux
 
-## 설정
+## 설정(커스텀)
 ```git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm```<br/>
 ```git clone https://github.com/tmux-plugins/tmux-logging ~/.tmux/plugins/tmux-logging```<br/>
 ```
@@ -60,7 +60,7 @@ run-shell ~/.tmux/plugins/tmux-logging/logging.tmux
 ```tmux a```<br/>```tmux a -t <name>```
 
 ## tmux 기본 prefix
-```[Ctrl + a]```
+```[Ctrl + b]```
 
 ## tmux logger 로깅 시작/중지 
 ```prefix + [Shift + p]```
