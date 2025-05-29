@@ -11,6 +11,7 @@ $ cat .tmux.conf
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-logging'
+set -g history-limit 50000
 
 # remap prefix from 'C-b' to 'C-a'
 unbind C-b
