@@ -1,5 +1,42 @@
 # Tmux
 
+## 설정
+```git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm```<br/>
+```git clone https://github.com/tmux-plugins/tmux-logging ~/.tmux/plugins/tmux-logging```<br/>
+```
+$ cat .tmux.conf 
+
+# List of plugins
+
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-logging'
+
+# remap prefix from 'C-b' to 'C-a'
+unbind C-b
+set-option -g prefix C-a
+bind-key C-a send-prefix
+
+# split panes using | and -
+bind | split-window -h
+bind - split-window -v
+unbind '"'
+unbind %
+
+# switch panes using Alt-arrow without prefix
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Enable mouse control (clickable windows, panes, resizable panes)
+set -g mouse on
+
+# Initialize TMUX plugin manager (keep at bottom)
+run '~/.tmux/plugins/tpm/tpm'
+run-shell ~/.tmux/plugins/tmux-logging/logging.tmux
+```
+
 ## 새로운 tmux session 시작
 ```tmux new -s <name>```
 
@@ -22,7 +59,7 @@
 ```tmux a```<br/>```tmux a -t <name>```
 
 ## tmux 기본 prefix
-```[Ctrl + b]```
+```[Ctrl + a]```
 
 ## tmux logger 로깅 시작/중지 
 ```prefix + [Shift + p]```
