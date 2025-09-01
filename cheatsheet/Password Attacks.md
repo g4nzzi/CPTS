@@ -41,7 +41,26 @@ john --wordlist=<wordlist.txt> server_doc.hash
 - 툴 위치 검색 : ```$ locate *2john*```
 
 <br/><br/>
-# 2. Remote Password Attacks
+# 2. Hashcat
+
+- `-a`는 `attack mode`를 지정
+- `-m`은 `hash type`를 지정
+- `<hashes>`는 해시 문자열이거나 동일한 유형의 암호 해시를 하나 이상 포함
+- `[wordlist, rule, mask, ...]`는 공격 모드에 따라 달라지는 추가 인수
+```$ hashcat -a 0 -m 0 <hashes> [wordlist, rule, mask, ...]```
+
+### Hash types
+- [해시 예시](https://hashcat.net/wiki/doku.php?id=example_hashes) 목록
+- [hashID를](https://github.com/psypanda/hashID) 사용하면 `-m` 인수를 지정하여 hashcat 해시 유형 식별<br/>
+```$ hashid -m '$1$FNr44XZC$wQxY6HHLrgrGX0e1195k.1'```
+
+### Dictionary attack
+- 사전 공격(`-a 0`), MD5 해시(-m 0)<br/>
+```$ hashcat -a 0 -m 0 e3e3ec5831ad5e7288241960e5d4fdb8 /usr/share/wordlists/rockyou.txt```
+
+
+<br/><br/>
+# 3. Remote Password Attacks
 
 ### CrackMapExec(NetExec) - WinRM
 ```crackmapexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>```<br/>
