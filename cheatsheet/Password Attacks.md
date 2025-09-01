@@ -1,7 +1,7 @@
 # 1. John The Ripper
 
 ### Single Crack Mode
-```john --format=<hash_type> <hash or hash_file>```
+```john --single <hash or hash_file>```
 
 ### Wordlist Mode
 ```john --wordlist=<wordlist_file> --rules <hash_file>```
