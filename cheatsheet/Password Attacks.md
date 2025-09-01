@@ -63,6 +63,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 
 ### Mask attack
 - 비밀번호 길이나 조합이 예측가능한 경우, 사용자 지정 문자 집합(`-a 3`) + 문자셋 조합
+
 | Symbol | Charset                             |
 | ------ | ----------------------------------- |
 | ?l     | abcdefghijklmnopqrstuvwxyz          |
@@ -73,6 +74,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 | ?s     | «space»!"#$%&'()*+,-./:;<=>?@[]^_`{ |
 | ?a     | ?l?u?d?s                            |
 | ?b     | 0x00 - 0xff                         |
+
 ```$ hashcat -a 3 -m 0 1e293d6912d074c0fd15844d803400dd '?u?l?l?l?l?d?s'```
 
 ### Custom Wordlists and Rules
