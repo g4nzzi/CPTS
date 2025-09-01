@@ -46,17 +46,37 @@ john --wordlist=<wordlist.txt> server_doc.hash
 - `-a`는 `attack mode`를 지정
 - `-m`은 `hash type`를 지정
 - `<hashes>`는 해시 문자열이거나 동일한 유형의 암호 해시를 하나 이상 포함
-- `[wordlist, rule, mask, ...]`는 공격 모드에 따라 달라지는 추가 인수
+- `[wordlist, rule, mask, ...]`는 공격 모드에 따라 달라지는 추가 인수<br/>
 ```$ hashcat -a 0 -m 0 <hashes> [wordlist, rule, mask, ...]```
 
 ### Hash types
 - [해시 예시](https://hashcat.net/wiki/doku.php?id=example_hashes) 목록
-- [hashID를](https://github.com/psypanda/hashID) 사용하면 `-m` 인수를 지정하여 hashcat 해시 유형 식별<br/>
+- [hashID](https://github.com/psypanda/hashID)를 사용하면 `-m` 인수를 지정하여 hashcat 해시 유형 식별<br/>
 ```$ hashid -m '$1$FNr44XZC$wQxY6HHLrgrGX0e1195k.1'```
 
 ### Dictionary attack
-- 사전 공격(`-a 0`), MD5 해시(-m 0)<br/>
+- 사전 공격(`-a 0`), MD5 해시(`-m 0`)<br/>
 ```$ hashcat -a 0 -m 0 e3e3ec5831ad5e7288241960e5d4fdb8 /usr/share/wordlists/rockyou.txt```
+
+- 사전 공격으로 해독할 수 없을 경우, 룰(rule) 기반 공격 시도(예 : best64.rule)<br/>
+```$ hashcat -a 0 -m 0 1b0556a75770563578569ae21392630c /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
+
+### Mask attack
+- 비밀번호 길이나 조합이 예측가능한 경우, 사용자 지정 문자 집합(`-a 3`) + 문자셋 조합
+| Symbol | Charset                             |
+| ------ | ----------------------------------- |
+| ?l     | abcdefghijklmnopqrstuvwxyz          |
+| ?u     | ABCDEFGHIJKLMNOPQRSTUVWXYZ          |
+| ?d     | 0123456789                          |
+| ?h     | 0123456789abcdef                    |
+| ?H     | 0123456789ABCDEF                    |
+| ?s     | «space»!"#$%&'()*+,-./:;<=>?@[]^_`{ |
+| ?a     | ?l?u?d?s                            |
+| ?b     | 0x00 - 0xff                         |
+```$ hashcat -a 3 -m 0 1e293d6912d074c0fd15844d803400dd '?u?l?l?l?l?d?s'```
+
+### Custom Wordlists and Rules
+
 
 
 <br/><br/>
