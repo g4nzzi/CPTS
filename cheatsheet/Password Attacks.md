@@ -59,7 +59,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 ```$ hashcat -a 0 -m 0 e3e3ec5831ad5e7288241960e5d4fdb8 /usr/share/wordlists/rockyou.txt```
 
 - 사전 공격으로 해독할 수 없을 경우, 룰(rule) 기반 공격 시도(예 : best64.rule)<br/>
-```$ hashcat -a 0 -m 0 1b0556a75770563578569ae21392630c /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
+```$ hashcat -a 0 -m 0 1b0556a75770563578569ae21392630c /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule```
 
 ### Mask attack
 - 비밀번호 길이나 조합이 예측가능한 경우, 사용자 지정 문자 집합(`-a 3`) + 문자셋 조합
