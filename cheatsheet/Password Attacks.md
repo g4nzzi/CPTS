@@ -9,6 +9,11 @@
 ### Incremental Mode (문자 조합 사용)
 ```john --incremental <hash_file>```
 
+### 해시 식별
+- [JtR의 샘플 해시 문서](https://openwall.info/wiki/john/sample-hashes) 나 [PentestMonkey의 이 목록을](https://pentestmonkey.net/cheat-sheet/john-the-ripper-hash-formats) 참조
+- [hashID](https://github.com/psypanda/hashID)와 같은 도구를 사용
+```$ hashid -j 193069ceb0461e1d40d216e32c79c704```
+
 ### 파일 Cracking
 ```
 pdf2john server_doc.pdf > server_doc.hash
