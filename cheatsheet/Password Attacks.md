@@ -78,6 +78,33 @@ john --wordlist=<wordlist.txt> server_doc.hash
 ```$ hashcat -a 3 -m 0 1e293d6912d074c0fd15844d803400dd '?u?l?l?l?l?d?s'```
 
 ### Custom Wordlists and Rules
+```
+ls /usr/share/hashcat/rules/
+cat custom.rule
+
+:
+c
+so0
+c so0
+sa@
+c sa@
+c sa@ so0
+$!
+$! c
+$! so0
+$! sa@
+$! c so0
+$! c sa@
+$! so0 sa@
+$! c so0 sa@
+```
+```hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list```
+
+### CeWL를 이용한 Wordlist 생성
+- 깊이(`-d`), 단어의 최소 길이(`-m`), 검색된 단어의 소문자 저장(`--lowercase`), 그리고 결과를 저장할 파일(`-w`)<br/>
+```cewl https://www.domain.com -d 4 -m 6 --lowercase -w inlane.wordlist```
+
+
 
 
 
@@ -113,31 +140,6 @@ john --wordlist=<wordlist.txt> server_doc.hash
 <br/><br/>
 # 3. Password 변형
 
-### Hashcat Rule 기반 Wordlist 생성
-```
-ls /usr/share/hashcat/rules/
-cat custom.rule
-
-:
-c
-so0
-c so0
-sa@
-c sa@
-c sa@ so0
-$!
-$! c
-$! so0
-$! sa@
-$! c so0
-$! c sa@
-$! so0 sa@
-$! c so0 sa@
-```
-```hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list```
-
-### CeWL를 이용한 Wordlist 생성
-```cewl https://www.domain.com -d 4 -m 6 --lowercase -w inlane.wordlist```
 
 ### Anarchy를 이용한 Custom Username 생성
 ```./username-anarchy -i /home/user/names.txt```<br/>
