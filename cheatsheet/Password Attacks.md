@@ -50,7 +50,7 @@ john --wordlist=<wordlist.txt> server_doc.hash
 ```$ hashcat -a 0 -m 0 <hashes> [wordlist, rule, mask, ...]```
 
 ### Hash types
-1. [해시 예시](https://hashcat.net/wiki/doku.php?id=example_hashes) 목록
+1. [해시 예시](https://hashcat.net/wiki/doku.php?id=example_hashes) 목록<br/>
 2. [hashID](https://github.com/psypanda/hashID)를 사용하면 `-m` 인수를 지정하여 hashcat 해시 유형 식별<br/>
 ```$ hashid -m '$1$FNr44XZC$wQxY6HHLrgrGX0e1195k.1'```
 
