@@ -297,7 +297,7 @@ mimikatz # sekurlsa::credman
 <br/><br/>
 ## Attacking Active Directory & NTDS.dit
 - 사용자 이름 목록 수동 생성 : [Username Anarchy](https://github.com/urbanadventurer/username-anarchy)<br/>
-```$ ./username-anarchy -i /home/ltnbob/names.txt```
+```$ ./username-anarchy -i ./usernames.txt > ./names.txt```
 
 ### Kerbrute를 사용하여 유효한 사용자 이름 열거
 ```$ ./kerbrute_linux_amd64 userenum --dc 10.129.201.57 --domain inlanefreight.local names.txt```
