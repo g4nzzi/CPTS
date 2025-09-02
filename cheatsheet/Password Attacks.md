@@ -322,6 +322,7 @@ mimikatz # sekurlsa::credman
 ## 자격증명 검색
 
 ### Lazagne 사용하여 자격증명 검색
+- [standalone copy](https://github.com/AlessandroZ/LaZagne/releases/)을 다운로드하여 실행<br/>
 ```start lazagne.exe all```
 
 ### findstr 사용하여 자격증명 검색
