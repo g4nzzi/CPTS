@@ -409,10 +409,13 @@ Credentials
 ### Unshadow, Hashcat으로 Cracking
 - [unshadow](https://github.com/pmittaldev/john-the-ripper/blob/master/src/unshadow.c) : `passwd` 파일과 `shadow` 파일을 결합하여 크래킹에 적합한 단일 파일로 만듬
 ```
-sudo cp /etc/passwd /tmp/passwd.bak 
-sudo cp /etc/shadow /tmp/shadow.bak 
-unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
-hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
+$ sudo cp /etc/passwd /tmp/passwd.bak 
+$ sudo cp /etc/shadow /tmp/shadow.bak 
+$ unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
+
+$ john --single unshadowed.hashes
+  또는
+$ hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
 ```
 
 ### Hashcat으로 MD5 Hash Cracking
