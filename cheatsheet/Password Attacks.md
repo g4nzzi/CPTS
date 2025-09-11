@@ -333,6 +333,7 @@ impacket-dpapi credential -file vault -key '0x46cfb8b408aab4ae66ffbbbcf67ac03cfc
 <br/><br/>
 ## Attacking Active Directory & NTDS.dit
 - 사용자 이름 목록 수동 생성 : [Username Anarchy](https://github.com/urbanadventurer/username-anarchy)<br/>
+```$ git clone https://github.com/urbanadventurer/username-anarchy.git```<br/>
 ```$ ./username-anarchy -i ./usernames.txt > ./names.txt```
 
 ### Kerbrute를 사용하여 유효한 사용자 이름 열거
