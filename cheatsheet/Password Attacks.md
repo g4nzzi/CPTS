@@ -360,10 +360,27 @@ impacket-dpapi credential -file vault -key '0x46cfb8b408aab4ae66ffbbbcf67ac03cfc
 
 ### Lazagne 사용하여 자격증명 검색
 - [LaZagne standalone](https://github.com/AlessandroZ/LaZagne/releases/)을 다운로드하여 실행<br/>
-```start lazagne.exe all```
+```> start lazagne.exe all```
 
 ### findstr 사용하여 자격증명 검색
-```findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml```
+```findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml```<br/>
+```
+주요 검색 키워드
+Passwords
+Passphrases
+Keys
+Username
+User account
+Creds
+Users
+Passkeys
+configuration
+dbcredential
+dbpassword
+pwd
+Login
+Credentials
+```
 
 <br/><br/>
 # 6. Linux Local Password Attacks
