@@ -413,7 +413,7 @@ $ sudo cp /etc/passwd /tmp/passwd.bak
 $ sudo cp /etc/shadow /tmp/shadow.bak 
 $ unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
 
-$ john --single unshadowed.hashes
+$ john --single /tmp/unshadowed.hashes
   또는
 $ hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
 ```
