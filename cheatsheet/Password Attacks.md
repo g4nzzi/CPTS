@@ -512,7 +512,7 @@ PS> Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public
 
 ### MANSPIDER(Linux)
 - [MANSPIDER](https://github.com/blacklanternsecurity/MANSPIDER)는 도메인에 가입된 컴퓨터에 접근할 수 없거나 원격으로 파일을 검색하고 싶은 경우 사용<br/>
-```$ docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.121 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'```
+```$ sudo docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.173 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'```
 
 ### NetExec(Linux)
 - `--spider`, `-M spider_plus` 옵션을 사용하여 네트워크 공유를 검색하는데 사용<br/>
