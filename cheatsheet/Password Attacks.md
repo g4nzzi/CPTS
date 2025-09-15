@@ -503,7 +503,7 @@ $ ./Pcredz -f ../demo.pcapng -t -v
 ```c:\Users\Public>Snaffler.exe -s -u```<br/>
 
 ### PowerHuntShares(Windows)
-- [PowerHuntShares](https://github.com/NetSPI/PowerHuntShares는 도메인에 가입된 컴퓨터에서 실행할 필요가 없는 PowerShell 스크립트<br/>
+- [PowerHuntShares](https://github.com/NetSPI/PowerHuntShares)는 도메인에 가입된 컴퓨터에서 실행할 필요가 없는 PowerShell 스크립트<br/>
 ```
 PS> Set-ExecutionPolicy -Scope Process Bypass
 PS> Import-Module .\PowerHuntShares.psm1
